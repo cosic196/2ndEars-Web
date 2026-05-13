@@ -1,0 +1,205 @@
+/* ============================================================
+   2ndEars — Colors & Typography
+   ------------------------------------------------------------
+   Studio-hardware aesthetic: warm near-black neutrals, a single
+   amber "signal" accent for activity, and a cool blue accent for
+   the AI assistant. All colors are oklch() so they composite
+   cleanly via color-mix.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root {
+  /* ─── Surfaces ─────────────────────────────────────────────
+     Warm near-blacks. Layered top-down: --bg-0 is the deepest
+     surface (canvas), --bg-3 is the topmost (active/raised). */
+  --bg-0: oklch(0.14 0.004 60);  /* canvas — body, waiting screen */
+  --bg-1: oklch(0.17 0.005 60);  /* chrome — top bar, status bar, chat */
+  --bg-2: oklch(0.21 0.006 60);  /* card  — nodes, ghost buttons */
+  --bg-3: oklch(0.26 0.008 60);  /* raised — user bubbles, hovered nodes */
+  --bg-hover: oklch(0.24 0.008 60);
+
+  /* ─── Foreground / type ────────────────────────────────────
+     Inverse scale: --fg-0 is the brightest. Almost-white-but-warm. */
+  --fg-0: oklch(0.96 0.003 60);  /* primary text */
+  --fg-1: oklch(0.78 0.005 60);  /* secondary text */
+  --fg-2: oklch(0.58 0.006 60);  /* tertiary / mono labels */
+  --fg-3: oklch(0.42 0.006 60);  /* disabled / hints */
+
+  /* ─── Strokes / dividers ───────────────────────────────────
+     Hairline borders only — never heavier than 1px in chrome. */
+  --line-0: oklch(0.28 0.006 60);
+  --line-1: oklch(0.34 0.008 60);
+
+  /* ─── Accents ──────────────────────────────────────────────
+     Two only. Signal = audio activity (amber). AI = assistant
+     output (cool blue). Both in the muted-warm/cool family. */
+  --signal:      oklch(0.82 0.14 75);          /* amber — listening, level, send */
+  --signal-soft: oklch(0.82 0.14 75 / 0.14);
+  --ai:          oklch(0.74 0.09 220);         /* cool blue — assistant */
+  --ai-soft:     oklch(0.74 0.09 220 / 0.12);
+
+  /* ─── Semantic ─────────────────────────────────────────────
+     Used sparingly: ok = healthy meter, warn = clipping/limit. */
+  --ok:   oklch(0.75 0.10 150);
+  --warn: oklch(0.78 0.14 50);
+
+  /* ─── Routing-graph node hues ──────────────────────────────
+     Three muted tints used as 3px "hue strips" on routing nodes. */
+  --node-src:    oklch(0.70 0.06 160);  /* source — green-leaning */
+  --node-bus:    oklch(0.70 0.06 60);   /* bus    — amber-leaning */
+  --node-master: oklch(0.70 0.06 20);   /* master — red-leaning   */
+
+  /* ─── Radii ────────────────────────────────────────────────
+     Tight. UI never goes pill-shaped except for the listening
+     indicator and chips. */
+  --radius-s: 4px;
+  --radius-m: 6px;
+  --radius-l: 10px;
+  --radius-pill: 999px;
+
+  /* ─── Spacing scale ────────────────────────────────────────
+     4-step base. The app sits in the 6–18px range; 24+ is rare. */
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 6px;
+  --space-4: 8px;
+  --space-5: 10px;
+  --space-6: 12px;
+  --space-7: 14px;
+  --space-8: 16px;
+  --space-9: 20px;
+  --space-10: 24px;
+
+  /* ─── Type families ────────────────────────────────────────
+     Inter for everything, JetBrains Mono for technical readouts
+     (LUFS, dB values, sample rate, turn counters, status bar). */
+  --font-ui:   'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* ─── Type tokens ──────────────────────────────────────────
+     The whole app sits in a 10–14px window. 16+ only on the
+     waiting screen H1. Tight letter-spacing throughout. */
+
+  /* H1 — waiting-screen brand wordmark */
+  --h1-size: 28.8px;       /* 1.8rem at 16px root */
+  --h1-weight: 600;
+  --h1-tracking: -0.02em;
+  --h1-leading: 1.2;
+
+  /* H2 — section title (e.g. "Spectral Masking") */
+  --h2-size: 14px;
+  --h2-weight: 600;
+  --h2-tracking: -0.01em;
+  --h2-leading: 1.3;
+
+  /* H3 — analyzer name in masking list */
+  --h3-size: 12.5px;
+  --h3-weight: 600;
+  --h3-tracking: -0.005em;
+
+  /* Body — chat messages, default reading */
+  --body-size: 13px;
+  --body-leading: 1.5;
+  --body-tracking: -0.005em;
+
+  /* UI — controls, buttons, tabs */
+  --ui-size: 11.5px;
+  --ui-weight: 500;
+
+  /* Hint — placeholders, footers, helper text */
+  --hint-size: 11px;
+
+  /* Mono label — UPPERCASE, wide-tracked, tertiary color
+     ("SR", "ANALYZERS", "TRACK", "DURATION"). Brand signature. */
+  --mono-label-size: 10px;
+  --mono-label-weight: 500;
+  --mono-label-tracking: 0.06em;
+
+  /* Mono value — readouts ("48.0k", "−14.2", "0/5 turns") */
+  --mono-value-size: 11px;
+  --mono-value-weight: 400;
+
+  /* Mono tiny — status bar, hint, char counter */
+  --mono-tiny-size: 10.5px;
+  --mono-tiny-tracking: 0.03em;
+}
+
+
+/* ============================================================
+   Semantic helpers — apply directly to elements
+   ============================================================ */
+
+.h1 {
+  font-family: var(--font-ui);
+  font-size: var(--h1-size);
+  font-weight: var(--h1-weight);
+  letter-spacing: var(--h1-tracking);
+  line-height: var(--h1-leading);
+  color: var(--fg-0);
+}
+
+.h2 {
+  font-family: var(--font-ui);
+  font-size: var(--h2-size);
+  font-weight: var(--h2-weight);
+  letter-spacing: var(--h2-tracking);
+  line-height: var(--h2-leading);
+  color: var(--fg-0);
+}
+
+.h3 {
+  font-family: var(--font-ui);
+  font-size: var(--h3-size);
+  font-weight: var(--h3-weight);
+  letter-spacing: var(--h3-tracking);
+  color: var(--fg-0);
+}
+
+.body {
+  font-family: var(--font-ui);
+  font-size: var(--body-size);
+  line-height: var(--body-leading);
+  letter-spacing: var(--body-tracking);
+  color: var(--fg-0);
+}
+
+.ui {
+  font-family: var(--font-ui);
+  font-size: var(--ui-size);
+  font-weight: var(--ui-weight);
+  color: var(--fg-1);
+}
+
+.hint {
+  font-family: var(--font-ui);
+  font-size: var(--hint-size);
+  color: var(--fg-3);
+}
+
+/* The brand's signature type pattern. Use anywhere a metric is
+   shown — in the top bar, chat counters, status bar, table cells.
+   ALWAYS pair label (uppercase) + value (raw number) inline. */
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: var(--mono-label-size);
+  font-weight: var(--mono-label-weight);
+  letter-spacing: var(--mono-label-tracking);
+  text-transform: uppercase;
+  color: var(--fg-2);
+}
+
+.mono-value {
+  font-family: var(--font-mono);
+  font-size: var(--mono-value-size);
+  color: var(--fg-1);
+}
+
+.mono-value.strong { color: var(--fg-0); }
+
+.mono-tiny {
+  font-family: var(--font-mono);
+  font-size: var(--mono-tiny-size);
+  letter-spacing: var(--mono-tiny-tracking);
+  color: var(--fg-2);
+}
