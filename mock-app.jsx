@@ -339,8 +339,9 @@ function DesktopAppMock({ height = 540 }) {
           </button>
         </div>
       </div>
-      {/* Main grid: tabs+routing | chat */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', height: height - 28 - 44 - 24 }}>
+      {/* Main grid: tabs+routing | chat. Class-based grid so mobile rules can
+          exclude this from the universal collapse-to-1col override. */}
+      <div className="app-mock-grid" style={{ height: height - 28 - 44 - 24 }}>
         <div style={{ borderRight: '1px solid var(--line-0)', display: 'flex', flexDirection: 'column' }}>
           {/* tab bar */}
           <div style={{ height: 36, borderBottom: '1px solid var(--line-0)', display: 'flex', alignItems: 'center', padding: '0 14px', gap: 18 }}>

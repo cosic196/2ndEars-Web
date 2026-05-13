@@ -4,7 +4,7 @@ const EMAIL = 'cosic196@gmail.com';
 const PRICE = '$99';
 const TRIAL = '2-week free trial';
 const BUY_URL = '#';        // wire to polar.sh later
-const DOWNLOAD_URL = 'https://github.com/cosic196/2ndears-site/releases/latest';
+const DOWNLOAD_URL = '#';   // app installer
 
 // ─── Copy blocks ────────────────────────────────────────────────────────────
 const VALUE_PROPS = [

@@ -9,10 +9,9 @@ function LandingC() {
       <NavBar />
 
       {/* ── Hero: plugins as the product ───────────────────────────────── */}
-      <section style={{
+      <section className="hero-section" style={{
         position: 'relative', overflow: 'hidden',
         background: 'radial-gradient(ellipse 80% 60% at 50% 30%, color-mix(in oklch, var(--site-accent) 10%, transparent), transparent 60%), var(--site-bg)',
-        padding: '100px 32px 56px',
       }}>
         {/* horizontal hairline grid for "scope" feel */}
         <div style={{
@@ -42,20 +41,20 @@ function LandingC() {
           </div>
 
           {/* Two plugins floating */}
-          <div style={{
+          <div className="plugin-hero-row" style={{
             position: 'relative',
             display: 'flex', justifyContent: 'center', alignItems: 'flex-start', gap: 32,
             paddingBottom: 24,
           }}>
-            <div style={{ transform: 'rotate(-1.2deg) translateY(8px)', filter: 'drop-shadow(0 30px 60px rgba(0,0,0,.5))' }}>
+            <div className="plugin-hero-card" style={{ transform: 'rotate(-1.2deg) translateY(8px)', filter: 'drop-shadow(0 30px 60px rgba(0,0,0,.5))' }}>
               <LeftEarMock peak={0.72} />
             </div>
-            <div style={{ transform: 'rotate(1.2deg)', filter: 'drop-shadow(0 30px 60px rgba(0,0,0,.5))' }}>
+            <div className="plugin-hero-card" style={{ transform: 'rotate(1.2deg)', filter: 'drop-shadow(0 30px 60px rgba(0,0,0,.5))' }}>
               <RightEarMock peak={0.86} />
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 32, marginTop: 24 }}>
+          <div className="plugin-labels-row" style={{ display: 'flex', justifyContent: 'center', gap: 32, marginTop: 24, flexWrap: 'wrap' }}>
             <PluginLabel name="LeftEar" role="Per-track · captures audio + routing" />
             <PluginLabel name="RightEar" role="Master-side · carries track context" />
           </div>
@@ -102,7 +101,9 @@ function LandingC() {
             <h2 className="section-title">Everything in your session, rebuilt.</h2>
             <p className="section-lede">The plugins send audio and routing metadata over local IPC. The desktop app reconstructs your project — sources, buses, master — and runs analysis on every node.</p>
           </div>
-          <DesktopAppMock height={580} />
+          <div className="app-mock-frame">
+            <DesktopAppMock height={580} />
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginTop: 24 }}>
             {[
               ['ROUTING', 'Click any node to audition it in isolation.'],

@@ -217,3 +217,127 @@
     radial-gradient(ellipse 100% 60% at 50% -10%, color-mix(in oklch, var(--site-accent) 6%, transparent), transparent 60%),
     var(--site-bg);
 }
+
+/* ─── App-mock chrome (excluded from mobile collapse) ───────────────── */
+.app-mock-grid { display: grid; grid-template-columns: 1.4fr 1fr; }
+.app-mock-frame { width: 100%; }
+.hero-section { padding: 100px 32px 56px; }
+
+/* ============================================================
+   MOBILE — ≤ 768px
+   The whole site was authored desktop-first at 1280 wide.
+   This block stacks everything, shrinks type, hides nav links,
+   and puts the desktop-app screenshot in a horizontal-scroll
+   wrapper so it stays legible instead of getting mangled.
+   ============================================================ */
+@media (max-width: 768px) {
+  .site { font-size: 14px; }
+
+  /* Section padding / containers */
+  .section { padding: 56px 16px !important; }
+  .section-narrow { padding: 40px 16px !important; }
+  .container, .container-narrow { padding: 0 !important; max-width: 100% !important; }
+  .hero-section { padding: 64px 16px 40px !important; }
+
+  /* Headlines */
+  .site h1 { font-size: 38px !important; line-height: 1.05 !important; letter-spacing: -0.025em !important; }
+  .section-title { font-size: 24px !important; line-height: 1.18 !important; }
+  .section-lede { font-size: 14px !important; }
+  .section-head { margin-bottom: 28px !important; }
+
+  /* Class-based grids collapse */
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr !important; gap: 14px !important; }
+
+  /* Any landing-level inline grid collapses to one column. The desktop-app
+     mock dodges this rule because its internal grid is now class-based
+     (.app-mock-grid) — no inline grid-template-columns to match. */
+  .site [style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* NavBar — hide the link row + version chip; keep brand + Download */
+  .site-nav { height: 52px; }
+  .site-nav .inner { padding: 0 16px !important; gap: 10px !important; }
+  .site-nav .links { display: none !important; }
+  .site-nav .ver { display: none !important; }
+
+  /* Cards padding */
+  .card, .card-flat { padding: 18px !important; }
+  /* PricingCard's outer card uses big inline padding — bring it down */
+  .card[style*="padding: 40px"], .card[style*="padding: 48px"] { padding: 22px !important; }
+
+  /* Buttons stack vertically on narrow screens */
+  .btn { padding: 12px 16px !important; font-size: 13px !important; justify-content: center !important; }
+  /* BuyCta + similar inline flex rows of buttons — let them stack */
+  .btn + .btn { margin-top: 0; }
+
+  /* Footer stacks */
+  .site-foot { padding: 32px 16px 40px !important; }
+  .site-foot .inner { flex-direction: column !important; align-items: flex-start !important; gap: 24px !important; }
+  .foot-col { align-items: flex-start !important; }
+
+  /* ─── Hero plugins: stack and scale down ──────────────────────────── */
+  .plugin-hero-row {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+  .plugin-hero-row .plugin-hero-card {
+    transform: scale(0.78) !important;
+    transform-origin: center top !important;
+    margin: -40px 0 !important;
+  }
+  .plugin-labels-row {
+    flex-direction: column !important;
+    gap: 14px !important;
+    align-items: center !important;
+  }
+
+  /* ─── Desktop-app screenshot: horizontal-scroll snapshot ──────────── */
+  .app-mock-frame {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -16px;
+    padding: 0 16px 8px;
+    /* Hint at scroll affordance with a soft right fade */
+    -webkit-mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+  }
+  .app-mock-frame > * {
+    min-width: 940px;
+  }
+
+  /* Signal-flow strip — stack the steps */
+  .site section[style*="border-top"] .row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  /* Feature list rows: drop the index column, stack label + desc */
+  .site [style*="grid-template-columns: 180px"] {
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+  }
+  /* Hide the trailing "01 / 06" index counter on mobile to save space */
+  .site [style*="grid-template-columns: 180px"] > .mono-tiny:last-child {
+    display: none;
+  }
+
+  /* Pricing card buttons column — keep stretched, not min-width 240 */
+  .card .stack-tight[style*="minWidth"], .card .stack-tight[style*="min-width"] {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+}
+
+/* ─── Small mobile (≤ 380px) ──────────────────────────────────────── */
+@media (max-width: 380px) {
+  .site h1 { font-size: 32px !important; }
+  .section-title { font-size: 22px !important; }
+  .plugin-hero-row .plugin-hero-card {
+    transform: scale(0.7) !important;
+    margin: -56px 0 !important;
+  }
+}
