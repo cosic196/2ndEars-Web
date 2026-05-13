@@ -11,7 +11,7 @@ const VALUE_PROPS = [
   {
     label: 'IN YOUR DAW',
     title: 'Lives in your session.',
-    body: 'Drop LeftEar and RightEar on any track or bus. The desktop app picks up routing, audio, and metadata over local IPC. No re-export, no bouncing stems, no leaving your DAW.',
+    body: 'Drop LeftEar and RightEar on any track or bus. The desktop app picks up routing, audio, and metadata. No re-export, no bouncing stems, no leaving your DAW.',
   },
   {
     label: 'OFFLINE',
@@ -31,7 +31,7 @@ const HOW_IT_WORKS = [
     name: 'LeftEar',
     role: 'VST plugin · per-track',
     body: 'A single instance per track or bus. Captures audio plus routing metadata so the desktop app can rebuild your session graph.',
-    spec: ['Single fader · master-bus toggle', 'Sends to 2ndEars over local IPC', 'AU · VST3 · AAX'],
+    spec: ['Single fader · master-bus toggle', 'Sends audio to 2ndEars', 'AU · VST3 · AAX'],
   },
   {
     step: '02',
@@ -45,7 +45,7 @@ const HOW_IT_WORKS = [
     name: '2ndEars',
     role: 'Desktop app · macOS · Windows',
     body: 'Receives audio, rebuilds Sources → Buses → Master, runs analysis, and hosts the chat. Click any node to audition it in isolation. Ask anything in plain English.',
-    spec: ['Routing · Analysis · Masking tabs', 'Local LLM via llama.cpp', 'Electron · 280 MB install'],
+    spec: ['Routing · Analysis · Masking tabs', 'Local AI', 'Electron · 280 MB install'],
   },
 ];
 
@@ -55,12 +55,11 @@ const FEATURES = [
   ['STEREO FIELD', 'Width readouts and transient density, surfaced per track and on the master.'],
   ['ROUTING GRAPH', 'Sources → Buses → Master rebuilt from the plugins. Click any node to audition it.'],
   ['AI ASSISTANT', '5 turns per session, streamed locally. Cites the exact measurement behind each suggestion.'],
-  ['SESSIONS', 'Snapshot a mix, compare to a previous version, copy the system prompt to take elsewhere.'],
 ];
 
 const FAQ = [
-  ['Does it use AI?', 'Yes — a local model running via llama.cpp on your machine. Nothing is sent to a server.'],
-  ['What about my stems?', 'Audio stays on disk. The plugins stream to the desktop app over local IPC only.'],
+  ['Does it use AI?', 'Yes — a local model running on your machine. Nothing is sent to a server.'],
+  ['What about my stems?', 'Audio stays on disk. The plugins stream to the desktop app directly.'],
   ['Will it mix for me?', "No. It gives you a second opinion grounded in measurements. The mix is still yours."],
 ];
 
@@ -80,7 +79,6 @@ function NavBar({ accent = 'amber' }) {
     <nav className="site-nav">
       <div className="inner">
         <Logo />
-        <span className="ver" style={{ marginLeft: 16 }}>v0.4.2 · BETA</span>
         <div className="links">
           <a href="#what">What it is</a>
           <a href="#how">How it works</a>
@@ -159,10 +157,10 @@ function PrivacyCallout({ variant = 'default' }) {
               Your stems are <em style={{ fontStyle: 'normal', color: 'var(--signal)' }}>yours</em>. We never see them.
             </h2>
             <p style={{ fontSize: 15, color: 'var(--fg-1)', maxWidth: 540, lineHeight: 1.55 }}>
-              The mixing assistant runs a local model on your machine via llama.cpp. No internet connection is required after install. No account. No telemetry. No data ever leaves your computer — not your audio, not your prompts, not your sessions.
+              The mixing assistant runs a local AI model on your machine. No internet connection is required after install. No account. No telemetry. No data ever leaves your computer — not your audio, not your prompts, not your sessions.
             </p>
             <ul style={{ listStyle: 'none', padding: 0, margin: '8px 0 0', display: 'grid', gap: 6 }}>
-              {['Local LLM · llama.cpp', 'No cloud sync', 'No accounts, no logins', 'Works on a plane'].map(t => (
+              {['Local LLM', 'No cloud sync', 'No accounts, no logins', 'Works on a plane'].map(t => (
                 <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-mono)', fontSize: 11.5, color: 'var(--fg-1)' }}>
                   <span style={{ width: 14, height: 14, color: 'var(--signal)' }}>
                     <svg width="14" height="14" viewBox="0 0 10 10"><path d="M2 5 L4.2 7.2 L8 3" stroke="currentColor" strokeWidth="1.3" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -189,7 +187,7 @@ function PrivacyCallout({ variant = 'default' }) {
               Your stems never leave your machine.
             </h2>
             <p style={{ fontSize: 15, color: 'var(--site-fg-1)', lineHeight: 1.55 }}>
-              The assistant runs a local model via llama.cpp. No cloud, no account, no telemetry. After install, 2ndEars works fully offline — on a plane, in a studio, anywhere. We never see your audio because we never receive it.
+              The assistant runs a local AI model. No cloud, no account, no telemetry. After install, 2ndEars works fully offline — on a plane, in a studio, anywhere. We never see your audio because we never receive it.
             </p>
           </div>
           <PrivacyDiagram />
@@ -305,7 +303,6 @@ function PricingCard({ id = 'pricing' }) {
               {[
                 '2-week free trial · no card required',
                 'License key delivered by email',
-                'Powered by polar.sh checkout',
                 'macOS 12+ · Windows 10+',
               ].map(t => (
                 <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--site-fg-1)' }}>
@@ -324,9 +321,6 @@ function PricingCard({ id = 'pricing' }) {
             <a href={BUY_URL} className="btn" style={{ justifyContent: 'center', padding: '14px 20px', fontSize: 14 }}>
               Buy a license · $99
             </a>
-            <span style={{ fontSize: 11, color: 'var(--site-fg-3)', textAlign: 'center', marginTop: 4, fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
-              CHECKOUT · POLAR.SH
-            </span>
           </div>
         </div>
       </div>

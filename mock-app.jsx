@@ -326,7 +326,6 @@ function DesktopAppMock({ height = 540 }) {
         <div style={{ display: 'flex', gap: 18, marginLeft: 16 }}>
           <span className="mono-l">SR <span style={{ color: 'var(--fg-1)' }}>48.0k</span></span>
           <span className="mono-l">ANALYZERS <span style={{ color: 'var(--fg-1)' }}>2</span></span>
-          <span className="mono-l">DURATION <span style={{ color: 'var(--fg-1)' }}>2:34</span></span>
         </div>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
           <button style={{
@@ -353,7 +352,6 @@ function DesktopAppMock({ height = 540 }) {
                 padding: '8px 0'
               }}>{t}</span>
             ))}
-            <span style={{ marginLeft: 'auto' }} className="mono-l">DURATION <span style={{ color: 'var(--fg-1)' }}>2:34</span></span>
           </div>
           <div style={{ flex: 1, padding: 16 }}>
             <RoutingGraphIllustration height={height - 28 - 44 - 24 - 36 - 32} />
@@ -417,7 +415,7 @@ function ChatPanelMock() {
       </div>
       {/* suggestion chips */}
       <div style={{ padding: '0 14px 10px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        {['Is the low end balanced?', 'How do I tame the sibilance?', 'Critique my vocal chain'].map(t => (
+        {['Is the low end balanced?', 'Which tracks are masking each other?', 'Is my mix muddy?'].map(t => (
           <span key={t} style={{
             padding: '4px 10px', borderRadius: 999,
             background: 'var(--bg-2)', border: '1px solid var(--line-0)',

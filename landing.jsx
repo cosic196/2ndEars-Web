@@ -99,7 +99,7 @@ function LandingC() {
           <div className="section-head">
             <span className="mono-l section-eyebrow">THE DESKTOP APP</span>
             <h2 className="section-title">Everything in your session, rebuilt.</h2>
-            <p className="section-lede">The plugins send audio and routing metadata over local IPC. The desktop app reconstructs your project — sources, buses, master — and runs analysis on every node.</p>
+            <p className="section-lede">The plugins send audio and routing metadata. The desktop app reconstructs your project — sources, buses, master — and runs analysis on every node.</p>
           </div>
           <div className="app-mock-frame">
             <DesktopAppMock height={580} />
