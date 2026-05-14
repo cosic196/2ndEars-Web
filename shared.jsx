@@ -6,6 +6,21 @@ const TRIAL = '2-week free trial';
 const BUY_URL = '#';        // wire to polar.sh later
 const DOWNLOAD_URL = 'https://github.com/cosic196/2ndEars-Web/releases/download/v0.1.0/2ndEars-Downloader-0.1.0.exe';
 
+// ─── Download gate ──────────────────────────────────────────────────────────
+// 2ndEars is in open beta and not yet code-signed, so Windows shows a
+// SmartScreen warning during install and the browser warns about the .exe.
+// We intercept every Download click and show a modal that walks the user
+// through the warnings before the file starts downloading.
+function handleDownloadClick(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  if (typeof window.__openDownloadModal === 'function') {
+    window.__openDownloadModal();
+  } else {
+    // Fallback: modal never mounted — just navigate.
+    window.location.href = DOWNLOAD_URL;
+  }
+}
+
 // ─── Copy blocks ────────────────────────────────────────────────────────────
 const VALUE_PROPS = [
   {
@@ -85,7 +100,7 @@ function NavBar({ accent = 'amber' }) {
           <a href="#features">Features</a>
           <a href="#pricing">Pricing</a>
         </div>
-        <a href={DOWNLOAD_URL} className="btn btn-primary" style={{ padding: '7px 14px' }}>
+        <a href={DOWNLOAD_URL} onClick={handleDownloadClick} className="btn btn-primary" style={{ padding: '7px 14px' }}>
           Download
         </a>
       </div>
@@ -99,7 +114,7 @@ function BuyCta({ size = 'md', layout = 'inline' }) {
   const fontSize = big ? 14 : 13;
   return (
     <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-      <a href={DOWNLOAD_URL} className="btn btn-primary" style={{ padding, fontSize }}>
+      <a href={DOWNLOAD_URL} onClick={handleDownloadClick} className="btn btn-primary" style={{ padding, fontSize }}>
         Download · free open beta
       </a>
     </div>
@@ -118,7 +133,7 @@ function Footer() {
         </div>
         <div className="foot-col">
           <span className="foot-meta">Download</span>
-          <a href={DOWNLOAD_URL} className="foot-email">Free open beta</a>
+          <a href={DOWNLOAD_URL} onClick={handleDownloadClick} className="foot-email">Free open beta</a>
           <span style={{ fontSize: 11, color: 'var(--site-fg-3)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
             No license required
           </span>
@@ -313,9 +328,10 @@ function PricingCard({ id = 'pricing' }) {
             </ul>
           </div>
           <div className="stack-tight" style={{ gap: 10, alignItems: 'stretch', minWidth: 240 }}>
-            <a href={DOWNLOAD_URL} className="btn btn-primary" style={{ justifyContent: 'center', padding: '14px 20px', fontSize: 14 }}>
+            <a href={DOWNLOAD_URL} onClick={handleDownloadClick} className="btn btn-primary" style={{ justifyContent: 'center', padding: '14px 20px', fontSize: 14 }}>
               Download · free open beta
             </a>
+            <WindowsWarningNote />
           </div>
         </div>
       </div>
@@ -401,9 +417,126 @@ function BeginnersAndPros() {
   );
 }
 
+// ─── Windows warning: pre-download modal ───────────────────────────────────
+// Mounts once at the page root. Other components trigger it by calling
+// window.__openDownloadModal(), which handleDownloadClick wires up.
+function WindowsWarningModal() {
+  const [open, setOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    window.__openDownloadModal = () => setOpen(true);
+    return () => { delete window.__openDownloadModal; };
+  }, []);
+
+  React.useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    window.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  const close = () => setOpen(false);
+  const proceed = () => {
+    setOpen(false);
+    window.location.href = DOWNLOAD_URL;
+  };
+
+  return (
+    <div className="dl-modal-backdrop" onClick={close}>
+      <div
+        className="dl-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="dl-modal-title"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button className="dl-modal-close" onClick={close} aria-label="Close">×</button>
+        <span className="mono-l label-accent">HEADS UP · WINDOWS WARNING</span>
+        <h2 id="dl-modal-title" className="dl-modal-title">Windows will warn you. That's expected.</h2>
+        <p className="dl-modal-lede">
+          2ndEars is in open beta and not yet code-signed, so Windows will flag it as
+          coming from an "unknown publisher". It's safe to install — here's how to
+          get past the two warnings you'll see.
+        </p>
+
+        <ol className="dl-steps">
+          <li>
+            <span className="dl-step-n">1</span>
+            <div className="dl-step-body">
+              <h3>Your browser may flag the download</h3>
+              <p>
+                If Chrome or Edge says <em>"this file isn't commonly downloaded"</em>,
+                click <strong>Keep</strong> (Chrome) or the <strong>⋯ menu → Keep</strong> (Edge).
+              </p>
+            </div>
+          </li>
+          <li>
+            <span className="dl-step-n">2</span>
+            <div className="dl-step-body">
+              <h3>SmartScreen appears when you run the installer</h3>
+              <p>
+                You'll see <em>"Windows protected your PC"</em>. Click the small
+                <strong> More info</strong> link, then the <strong>Run anyway</strong> button
+                that appears.
+              </p>
+            </div>
+          </li>
+          <li>
+            <span className="dl-step-n">3</span>
+            <div className="dl-step-body">
+              <h3>UAC will ask for permission</h3>
+              <p>Windows asks whether to allow changes for the install. Click <strong>Yes</strong>.</p>
+            </div>
+          </li>
+        </ol>
+
+        <p className="dl-modal-fine">
+          A signing certificate is on the roadmap before 1.0. For now, beta builds
+          stay unsigned so we can ship updates quickly. The source is on
+          <a href="https://github.com/cosic196/2ndEars" target="_blank" rel="noreferrer"> GitHub</a>.
+        </p>
+
+        <div className="dl-modal-actions">
+          <button type="button" className="btn btn-ghost" onClick={close}>Cancel</button>
+          <a className="btn btn-primary" href={DOWNLOAD_URL} onClick={proceed}>
+            Got it · Download
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Small inline link placed under prominent Download buttons. Opens the same
+// modal so users who closed it (or want to read first) can re-open it.
+function WindowsWarningNote({ align = 'center' }) {
+  return (
+    <button
+      type="button"
+      className="dl-warn-link"
+      onClick={handleDownloadClick}
+      style={{ justifyContent: align === 'left' ? 'flex-start' : 'center' }}
+    >
+      <svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true">
+        <path d="M6 1 L11 10.5 L1 10.5 Z" fill="none" stroke="currentColor" strokeWidth="1" strokeLinejoin="round" />
+        <path d="M6 5 V7.5 M6 9 v0.1" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+      </svg>
+      <span>Unsigned beta · how to skip the Windows warning</span>
+    </button>
+  );
+}
+
 Object.assign(window, {
   EMAIL, PRICE, TRIAL, BUY_URL, DOWNLOAD_URL,
   VALUE_PROPS, HOW_IT_WORKS, FEATURES, FAQ,
   Logo, NavBar, BuyCta, Footer,
   PrivacyCallout, PrivacyDiagram, PricingCard, FeatureList, BeginnersAndPros,
+  WindowsWarningModal, WindowsWarningNote, handleDownloadClick,
 });
