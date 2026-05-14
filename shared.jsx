@@ -29,14 +29,14 @@ const HOW_IT_WORKS = [
   {
     step: '01',
     name: 'LeftEar',
-    role: 'VST plugin · per-track',
-    body: 'A single instance per track or bus. Captures audio plus routing metadata so the desktop app can rebuild your session graph.',
-    spec: ['Single fader · master-bus toggle', 'Sends audio to 2ndEars', 'VST3'],
+    role: 'VST plugin · per-bus',
+    body: 'A single instance per bus. Captures audio plus routing metadata so the desktop app can rebuild your session graph.',
+    spec: ['Sends audio to 2ndEars', 'VST3'],
   },
   {
     step: '02',
     name: 'RightEar',
-    role: 'VST plugin · master-side',
+    role: 'VST plugin · On each track',
     body: 'Pairs with LeftEar. Carries an optional 120-char track description so the assistant knows what it\'s listening to — "lead vocal, doubled, slight rasp" — not just "Audio 14".',
     spec: ['Track description (0/120)', 'Hint context for the assistant', 'VST3'],
   },
@@ -45,7 +45,7 @@ const HOW_IT_WORKS = [
     name: '2ndEars',
     role: 'Desktop app · Windows',
     body: 'Receives audio, rebuilds Sources → Buses → Master, runs analysis, and hosts the chat. Click any node to audition it in isolation. Ask anything in plain English.',
-    spec: ['Routing · Analysis · Masking tabs', 'Local AI', 'Electron · 280 MB install'],
+    spec: ['Routing · Analysis · Masking', 'Local AI'],
   },
 ];
 
