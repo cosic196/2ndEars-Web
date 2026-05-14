@@ -330,6 +330,35 @@
     min-width: 0 !important;
     width: 100% !important;
   }
+
+  /* ─── LandingB hero ─────────────────────────────────────────────── */
+  .hero-b-section {
+    padding: 64px 16px 48px !important;
+  }
+
+  /* SectionLabel: tighten the gap between § number and title when stacked */
+  .section-label {
+    gap: 12px !important;
+    margin-bottom: 28px !important;
+  }
+  .section-label h2 { font-size: 26px !important; }
+
+  /* Plugin pair: horizontal scroll so both mocks are visible */
+  .plugin-pair-row {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 32px -16px 0 !important;
+    padding: 0 16px 12px !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    gap: 16px !important;
+    -webkit-mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+  }
+  .plugin-pair-row > div {
+    flex-shrink: 0;
+    transform: none !important;
+  }
 }
 
 /* ─── Small mobile (≤ 380px) ──────────────────────────────────────── */
