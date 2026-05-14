@@ -39,9 +39,10 @@ function LandingB() {
                 <span className="mono-l">RUNS ON</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>Windows · macOS (coming soon)</span>
                 <span className="mono-l">FORMATS</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>VST3</span>
               </div>
-              <a href={DOWNLOAD_URL} className="btn btn-primary" style={{ padding: '11px 18px', fontSize: 13 }}>
+              <a href={DOWNLOAD_URL} onClick={handleDownloadClick} className="btn btn-primary" style={{ padding: '11px 18px', fontSize: 13 }}>
                 Download · free open beta
               </a>
+              <WindowsWarningNote align="left" />
             </div>
           </div>
         </div>
@@ -190,6 +191,7 @@ function LandingB() {
       </section>
 
       <Footer />
+      <WindowsWarningModal />
     </div>
   );
 }
@@ -309,9 +311,10 @@ function PricingInline() {
         </ul>
       </div>
       <div className="stack-tight" style={{ gap: 10, alignItems: 'stretch', minWidth: 240 }}>
-        <a href={DOWNLOAD_URL} className="btn btn-primary" style={{ justifyContent: 'center', padding: '14px 20px', fontSize: 14 }}>
+        <a href={DOWNLOAD_URL} onClick={handleDownloadClick} className="btn btn-primary" style={{ justifyContent: 'center', padding: '14px 20px', fontSize: 14 }}>
           Download · free open beta
         </a>
+        <WindowsWarningNote />
       </div>
     </div>
   );

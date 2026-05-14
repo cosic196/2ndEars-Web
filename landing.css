@@ -371,3 +371,164 @@
     margin: -56px 0 !important;
   }
 }
+
+/* ============================================================
+   Windows warning — pre-download modal + inline note
+   ============================================================ */
+
+.dl-warn-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 2px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--site-fg-3);
+  transition: color .12s;
+}
+.dl-warn-link:hover,
+.dl-warn-link:focus-visible { color: var(--site-accent); }
+.dl-warn-link svg { flex-shrink: 0; }
+.dl-warn-link span { text-decoration: underline; text-decoration-color: color-mix(in oklch, currentColor 40%, transparent); text-underline-offset: 3px; }
+
+.dl-modal-backdrop {
+  position: fixed; inset: 0; z-index: 100;
+  background: color-mix(in oklch, oklch(0.06 0.005 60) 70%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: dlFade .14s ease-out;
+}
+
+@keyframes dlFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dlPop  { from { opacity: 0; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+.dl-modal {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: var(--site-card);
+  border: 1px solid var(--site-line-1);
+  border-radius: 10px;
+  padding: 32px 36px 28px;
+  color: var(--site-fg);
+  box-shadow: 0 24px 60px -20px rgba(0,0,0,0.55);
+  animation: dlPop .18s ease-out;
+}
+
+.dl-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  color: var(--site-fg-2);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+.dl-modal-close:hover { background: var(--site-card-2); color: var(--site-fg); }
+
+.dl-modal-title {
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--site-fg);
+  margin: 8px 0 12px;
+}
+.dl-modal-lede {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--site-fg-1);
+  margin: 0 0 22px;
+}
+
+.dl-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  display: grid;
+  gap: 14px;
+}
+.dl-steps li {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--site-bg-2);
+  border: 1px solid var(--site-line);
+  border-radius: 6px;
+}
+.dl-step-n {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--site-accent-soft);
+  color: var(--site-accent);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 1px;
+}
+.dl-step-body h3 {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--site-fg);
+  margin: 0 0 4px;
+  letter-spacing: -0.005em;
+}
+.dl-step-body p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--site-fg-1);
+  margin: 0;
+}
+.dl-step-body em { font-style: normal; color: var(--site-fg); }
+.dl-step-body strong { font-weight: 600; color: var(--site-fg); }
+
+.dl-modal-fine {
+  font-size: 12px;
+  line-height: 1.55;
+  color: var(--site-fg-2);
+  margin: 0 0 24px;
+}
+.dl-modal-fine a {
+  color: var(--site-fg-1);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.dl-modal-fine a:hover { color: var(--site-accent); }
+
+.dl-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+  padding-top: 18px;
+  border-top: 1px solid var(--site-line);
+}
+
+@media (max-width: 560px) {
+  .dl-modal { padding: 24px 20px 20px; border-radius: 8px; }
+  .dl-modal-title { font-size: 20px; }
+  .dl-steps li { padding: 12px 14px; }
+  .dl-modal-actions { flex-direction: column-reverse; align-items: stretch; }
+  .dl-modal-actions .btn { justify-content: center; }
+}
