@@ -499,8 +499,7 @@ function WindowsWarningModal() {
 
         <p className="dl-modal-fine">
           A signing certificate is on the roadmap before 1.0. For now, beta builds
-          stay unsigned so we can ship updates quickly. The source is on
-          <a href="https://github.com/cosic196/2ndEars" target="_blank" rel="noreferrer"> GitHub</a>.
+          stay unsigned so we can ship updates quickly.
         </p>
 
         <div className="dl-modal-actions">
