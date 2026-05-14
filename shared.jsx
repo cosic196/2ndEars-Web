@@ -1,6 +1,6 @@
 /* shared.jsx — atoms + copy used by all three landing directions. */
 
-const EMAIL = 'cosic196@gmail.com';
+const EMAIL = 'info@2ndears.com';
 const PRICE = '$99';
 const TRIAL = '2-week free trial';
 const BUY_URL = '#';        // wire to polar.sh later
@@ -31,19 +31,19 @@ const HOW_IT_WORKS = [
     name: 'LeftEar',
     role: 'VST plugin · per-track',
     body: 'A single instance per track or bus. Captures audio plus routing metadata so the desktop app can rebuild your session graph.',
-    spec: ['Single fader · master-bus toggle', 'Sends audio to 2ndEars', 'AU · VST3 · AAX'],
+    spec: ['Single fader · master-bus toggle', 'Sends audio to 2ndEars', 'VST3'],
   },
   {
     step: '02',
     name: 'RightEar',
     role: 'VST plugin · master-side',
     body: 'Pairs with LeftEar. Carries an optional 120-char track description so the assistant knows what it\'s listening to — "lead vocal, doubled, slight rasp" — not just "Audio 14".',
-    spec: ['Track description (0/120)', 'Hint context for the assistant', 'AU · VST3 · AAX'],
+    spec: ['Track description (0/120)', 'Hint context for the assistant', 'VST3'],
   },
   {
     step: '03',
     name: '2ndEars',
-    role: 'Desktop app · macOS · Windows',
+    role: 'Desktop app · Windows',
     body: 'Receives audio, rebuilds Sources → Buses → Master, runs analysis, and hosts the chat. Click any node to audition it in isolation. Ask anything in plain English.',
     spec: ['Routing · Analysis · Masking tabs', 'Local AI', 'Electron · 280 MB install'],
   },
@@ -58,7 +58,7 @@ const FEATURES = [
 ];
 
 const FAQ = [
-  ['Does it use AI?', 'Yes — a local model running on your machine. Nothing is sent to a server.'],
+  ['Does it use AI?', 'Yes — a local AI model running on your machine. Nothing is sent to a server.'],
   ['What about my stems?', 'Audio stays on disk. The plugins stream to the desktop app directly.'],
   ['Will it mix for me?', "No. It gives you a second opinion grounded in measurements. The mix is still yours."],
 ];
@@ -134,7 +134,7 @@ function Footer() {
         <div className="foot-col" style={{ alignItems: 'flex-end' }}>
           <span className="foot-meta">v0.4.2 BETA</span>
           <span style={{ fontSize: 11, color: 'var(--site-fg-3)', fontFamily: 'var(--font-mono)' }}>
-            macOS · Windows · AU · VST3 · AAX
+            Windows · VST3
           </span>
           <span style={{ fontSize: 11, color: 'var(--site-fg-3)', fontFamily: 'var(--font-mono)' }}>
             © 2026 2ndEars
@@ -303,7 +303,7 @@ function PricingCard({ id = 'pricing' }) {
               {[
                 '2-week free trial · no card required',
                 'License key delivered by email',
-                'macOS 12+ · Windows 10+',
+                'Windows 10+',
               ].map(t => (
                 <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--site-fg-1)' }}>
                   <span style={{ width: 14, height: 14, color: 'var(--site-accent)', flexShrink: 0 }}>

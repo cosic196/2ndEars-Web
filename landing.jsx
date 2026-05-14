@@ -31,14 +31,14 @@ function LandingB() {
             </div>
             <div className="stack" style={{ gap: 20, paddingBottom: 12 }}>
               <p style={{ fontSize: 17, lineHeight: 1.55, color: 'var(--site-fg-1)', textWrap: 'pretty' }}>
-                2ndEars sits in your DAW. It listens. It measures. It tells you what's really happening in your mix — grounded in numbers, not vibes. <span style={{ color: 'var(--site-fg)' }}>A local model runs on your machine.</span> Your audio never goes anywhere it doesn't already live.
+                2ndEars sits in your DAW. It listens. It measures. It tells you what's really happening in your mix — grounded in numbers, not vibes. <span style={{ color: 'var(--site-fg)' }}>A local AI model runs on your machine.</span> Your audio never goes anywhere it doesn't already live.
               </p>
               <div className="dashed-hr" />
               <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 18, rowGap: 8, fontFamily: 'var(--font-mono)' }}>
                 <span className="mono-l">PRICE</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>$99 · one-time</span>
                 <span className="mono-l">TRIAL</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>2 weeks · no card</span>
-                <span className="mono-l">RUNS ON</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>macOS · Windows</span>
-                <span className="mono-l">FORMATS</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>AU · VST3 · AAX</span>
+                <span className="mono-l">RUNS ON</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>Windows · macOS (coming soon)</span>
+                <span className="mono-l">FORMATS</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>VST3</span>
               </div>
               <BuyCta />
             </div>
@@ -231,13 +231,13 @@ function PrivacyInline() {
     <div className="grid-2" style={{ gap: 56, alignItems: 'center' }}>
       <div className="stack-tight" style={{ gap: 16 }}>
         <p style={{ fontSize: 22, lineHeight: 1.4, color: 'var(--site-fg)', letterSpacing: '-0.012em' }}>
-          Your stems never leave your machine. The assistant runs a local model via llama.cpp. No cloud, no account, no telemetry.
+          Your stems never leave your machine. The assistant runs a local AI model. No cloud, no account, no telemetry.
         </p>
         <p style={{ fontSize: 14, color: 'var(--site-fg-1)', lineHeight: 1.6 }}>
           After install, 2ndEars works fully offline. On a plane, in a studio, anywhere. We can't see your audio because we never receive it. The only network request the app ever makes is the one-time license check on first run.
         </p>
         <ul style={{ listStyle: 'none', padding: 0, margin: '12px 0 0', display: 'grid', gap: 8 }}>
-          {['Local LLM · llama.cpp', 'No cloud sync', 'No accounts, no logins', 'Works on a plane'].map(t => (
+          {['Local AI', 'No cloud sync', 'No accounts, no logins', 'Works on a plane'].map(t => (
             <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 10, fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--site-fg-1)' }}>
               <span style={{ width: 14, height: 14, color: 'var(--site-accent)', flexShrink: 0 }}>
                 <svg width="14" height="14" viewBox="0 0 10 10"><path d="M2 5 L4.2 7.2 L8 3" stroke="currentColor" strokeWidth="1.3" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -271,7 +271,7 @@ function PricingInline() {
           Includes the desktop app, LeftEar &amp; RightEar plugins, and every 1.x update. Use on up to two machines.
         </p>
         <ul style={{ listStyle: 'none', padding: 0, margin: '12px 0 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          {['2-week free trial', 'License via email', 'polar.sh checkout', 'macOS 12+ · Win 10+'].map(t => (
+          {['2-week free trial', 'License via email', 'Win 10+'].map(t => (
             <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--site-fg-1)' }}>
               <span style={{ width: 14, height: 14, color: 'var(--site-accent)', flexShrink: 0 }}>
                 <svg width="14" height="14" viewBox="0 0 10 10"><path d="M2 5 L4.2 7.2 L8 3" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -288,9 +288,6 @@ function PricingInline() {
         <a href={BUY_URL} className="btn" style={{ justifyContent: 'center', padding: '14px 20px', fontSize: 14 }}>
           Buy a license · $99
         </a>
-        <span style={{ fontSize: 11, color: 'var(--site-fg-3)', textAlign: 'center', marginTop: 4, fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
-          CHECKOUT · POLAR.SH
-        </span>
       </div>
     </div>
   );
