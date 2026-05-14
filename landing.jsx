@@ -135,7 +135,7 @@ function LandingB() {
       {/* ── 06 Features ────────────────────────────────────────────────── */}
       <section className="section" id="features" style={{ background: 'var(--site-bg-2)' }}>
         <div className="container">
-          <SectionLabel n="06" title="Features" subtitle="Six engines · one chat" />
+          <SectionLabel n="06" title="Features" subtitle="Four engines · one chat" />
           <div style={{ borderTop: '1px solid var(--site-line)' }}>
             {FEATURES.map(([label, desc], i) => (
               <div key={label} style={{
@@ -158,6 +158,29 @@ function LandingB() {
         <div className="container">
           <SectionLabel n="07" title="Pricing" subtitle="One purchase · no subscription" />
           <PricingInline />
+        </div>
+      </section>
+
+      {/* ── 08 System requirements ──────────────────────────────────────── */}
+      <section className="section-narrow" id="requirements">
+        <div className="container">
+          <SectionLabel n="08" title="System requirements" />
+          <div className="grid-2" style={{ gap: 32 }}>
+            <div style={{ paddingTop: 16, borderTop: '1px solid var(--site-line)' }}>
+              <span className="mono-l" style={{ display: 'block', marginBottom: 20 }}>MINIMUM</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 18, rowGap: 8 }}>
+                <span className="mono-l">RAM</span>
+                <span style={{ fontSize: 12, color: 'var(--site-fg-1)', fontFamily: 'var(--font-mono)' }}>16 GB</span>
+              </div>
+            </div>
+            <div style={{ paddingTop: 16, borderTop: '1px solid var(--site-line)' }}>
+              <span className="mono-l" style={{ display: 'block', marginBottom: 20 }}>RECOMMENDED</span>
+              <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 18, rowGap: 8 }}>
+                <span className="mono-l">RAM</span>
+                <span style={{ fontSize: 12, color: 'var(--site-fg-1)', fontFamily: 'var(--font-mono)' }}>32 GB · or 16 GB + GTX 1060</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
