@@ -4,7 +4,7 @@ const EMAIL = 'info@2ndears.com';
 const PRICE = '$99';
 const TRIAL = '2-week free trial';
 const BUY_URL = '#';        // wire to polar.sh later
-const DOWNLOAD_URL = '#';   // app installer
+const DOWNLOAD_URL = 'https://github.com/cosic196/2ndEars-Web/releases/download/v0.1.0/2ndEars-Downloader-0.1.0.exe';
 
 // ─── Copy blocks ────────────────────────────────────────────────────────────
 const VALUE_PROPS = [
