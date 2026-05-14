@@ -100,10 +100,7 @@ function BuyCta({ size = 'md', layout = 'inline' }) {
   return (
     <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
       <a href={DOWNLOAD_URL} className="btn btn-primary" style={{ padding, fontSize }}>
-        Download · {TRIAL}
-      </a>
-      <a href={BUY_URL} className="btn" style={{ padding, fontSize }}>
-        Buy a license · {PRICE}
+        Download · free open beta
       </a>
     </div>
   );
@@ -120,9 +117,11 @@ function Footer() {
           </div>
         </div>
         <div className="foot-col">
-          <span className="foot-meta">Buy</span>
-          <a href={BUY_URL} className="foot-email">License · {PRICE} one-time</a>
-          <a href={DOWNLOAD_URL} className="foot-email" style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>Download trial</a>
+          <span className="foot-meta">Download</span>
+          <a href={DOWNLOAD_URL} className="foot-email">Free open beta</a>
+          <span style={{ fontSize: 11, color: 'var(--site-fg-3)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
+            No license required
+          </span>
         </div>
         <div className="foot-col">
           <span className="foot-meta">Contact</span>
@@ -132,7 +131,7 @@ function Footer() {
           </span>
         </div>
         <div className="foot-col" style={{ alignItems: 'flex-end' }}>
-          <span className="foot-meta">v0.4.2 BETA</span>
+          <span className="foot-meta">BETA</span>
           <span style={{ fontSize: 11, color: 'var(--site-fg-3)', fontFamily: 'var(--font-mono)' }}>
             Windows · VST3
           </span>
@@ -280,7 +279,7 @@ function PricingCard({ id = 'pricing' }) {
       <div className="container-narrow">
         <div className="section-head" style={{ textAlign: 'center', alignItems: 'center' }}>
           <span className="mono-l section-eyebrow">PRICING</span>
-          <h2 className="section-title" style={{ textAlign: 'center' }}>One purchase. Yours forever.</h2>
+          <h2 className="section-title" style={{ textAlign: 'center' }}>Open beta. Free to use.</h2>
         </div>
         <div className="card" style={{
           padding: '40px 48px',
@@ -289,20 +288,19 @@ function PricingCard({ id = 'pricing' }) {
         }}>
           <div className="stack-tight" style={{ gap: 12 }}>
             <div className="row" style={{ gap: 10 }}>
-              <span className="chip"><span className="chip-dot" /> ONE-TIME</span>
-              <span className="mono-l">VERSION <span style={{ color: 'var(--site-fg-1)' }}>1.x</span></span>
+              <span className="chip"><span className="chip-dot" /> OPEN BETA · NO LICENSE REQUIRED</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, fontFamily: 'var(--font-mono)' }}>
-              <span style={{ fontSize: 56, fontWeight: 600, color: 'var(--site-fg)', letterSpacing: '-0.03em', lineHeight: 1 }}>$99</span>
-              <span style={{ fontSize: 13, color: 'var(--site-fg-2)' }}>USD · one-time</span>
+              <span style={{ fontSize: 56, fontWeight: 600, color: 'var(--site-fg)', letterSpacing: '-0.03em', lineHeight: 1 }}>Free</span>
             </div>
             <p style={{ fontSize: 14, color: 'var(--site-fg-1)', maxWidth: 440, marginTop: 6 }}>
-              Includes the desktop app, LeftEar &amp; RightEar plugins, and all 1.x updates. Use on up to two machines.
+              2ndEars is currently in an open beta program. Download it, use it, keep it — no license needed. Beta users keep their version forever.
             </p>
             <ul style={{ listStyle: 'none', padding: 0, margin: '12px 0 0', display: 'grid', gap: 8 }}>
               {[
-                '2-week free trial · no card required',
-                'License key delivered by email',
+                'No license required',
+                'No card required',
+                'Keep your beta version forever',
                 'Windows 10+',
               ].map(t => (
                 <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--site-fg-1)' }}>
@@ -316,10 +314,7 @@ function PricingCard({ id = 'pricing' }) {
           </div>
           <div className="stack-tight" style={{ gap: 10, alignItems: 'stretch', minWidth: 240 }}>
             <a href={DOWNLOAD_URL} className="btn btn-primary" style={{ justifyContent: 'center', padding: '14px 20px', fontSize: 14 }}>
-              Download trial
-            </a>
-            <a href={BUY_URL} className="btn" style={{ justifyContent: 'center', padding: '14px 20px', fontSize: 14 }}>
-              Buy a license · $99
+              Download · free open beta
             </a>
           </div>
         </div>

@@ -255,11 +255,12 @@
     grid-template-columns: 1fr !important;
   }
 
-  /* NavBar — hide the link row + version chip; keep brand + Download */
+  /* NavBar — hide the link row, version chip, and Download button; keep brand only */
   .site-nav { height: 52px; }
   .site-nav .inner { padding: 0 16px !important; gap: 10px !important; }
   .site-nav .links { display: none !important; }
   .site-nav .ver { display: none !important; }
+  .site-nav .btn { display: none !important; }
 
   /* Cards padding */
   .card, .card-flat { padding: 18px !important; }

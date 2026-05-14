@@ -15,7 +15,7 @@ function LandingB() {
               <div className="row" style={{ gap: 14, marginBottom: 28 }}>
                 <span className="logo-mark" style={{ width: 56, height: 56, color: 'var(--site-fg)' }} />
                 <div className="stack-tight" style={{ gap: 2 }}>
-                  <span className="mono-l">VERSION 0.4.2 · PUBLIC BETA</span>
+                  <span className="mono-l">PUBLIC BETA</span>
                   <span style={{ fontSize: 12, color: 'var(--site-fg-2)' }}>An AI-assisted mixing toolkit.</span>
                 </div>
               </div>
@@ -35,12 +35,13 @@ function LandingB() {
               </p>
               <div className="dashed-hr" />
               <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 18, rowGap: 8, fontFamily: 'var(--font-mono)' }}>
-                <span className="mono-l">PRICE</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>$99 · one-time</span>
-                <span className="mono-l">TRIAL</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>2 weeks · no card</span>
+                <span className="mono-l">STATUS</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>Open beta · free</span>
                 <span className="mono-l">RUNS ON</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>Windows · macOS (coming soon)</span>
                 <span className="mono-l">FORMATS</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>VST3</span>
               </div>
-              <BuyCta />
+              <a href={DOWNLOAD_URL} className="btn btn-primary" style={{ padding: '11px 18px', fontSize: 13 }}>
+                Download · free open beta
+              </a>
             </div>
           </div>
         </div>
@@ -156,7 +157,7 @@ function LandingB() {
       {/* ── 07 Pricing ─────────────────────────────────────────────────── */}
       <section className="section" id="pricing">
         <div className="container">
-          <SectionLabel n="07" title="Pricing" subtitle="One purchase · no subscription" />
+          <SectionLabel n="07" title="Pricing" subtitle="Open beta · free to use" />
           <PricingInline />
         </div>
       </section>
@@ -171,6 +172,8 @@ function LandingB() {
               <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 18, rowGap: 8 }}>
                 <span className="mono-l">RAM</span>
                 <span style={{ fontSize: 12, color: 'var(--site-fg-1)', fontFamily: 'var(--font-mono)' }}>16 GB</span>
+                <span className="mono-l">DISK</span>
+                <span style={{ fontSize: 12, color: 'var(--site-fg-1)', fontFamily: 'var(--font-mono)' }}>8 GB free</span>
               </div>
             </div>
             <div style={{ paddingTop: 16, borderTop: '1px solid var(--site-line)' }}>
@@ -178,6 +181,8 @@ function LandingB() {
               <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 18, rowGap: 8 }}>
                 <span className="mono-l">RAM</span>
                 <span style={{ fontSize: 12, color: 'var(--site-fg-1)', fontFamily: 'var(--font-mono)' }}>32 GB · or 16 GB + GTX 1060</span>
+                <span className="mono-l">DISK</span>
+                <span style={{ fontSize: 12, color: 'var(--site-fg-1)', fontFamily: 'var(--font-mono)' }}>8 GB free</span>
               </div>
             </div>
           </div>
@@ -257,7 +262,7 @@ function PrivacyInline() {
           Your stems never leave your machine. The assistant runs a local AI model. No cloud, no account, no telemetry.
         </p>
         <p style={{ fontSize: 14, color: 'var(--site-fg-1)', lineHeight: 1.6 }}>
-          After install, 2ndEars works fully offline. On a plane, in a studio, anywhere. We can't see your audio because we never receive it. The only network request the app ever makes is the one-time license check on first run.
+          After install, 2ndEars works fully offline. On a plane, in a studio, anywhere. We can't see your audio because we never receive it.
         </p>
         <ul style={{ listStyle: 'none', padding: 0, margin: '12px 0 0', display: 'grid', gap: 8 }}>
           {['Local AI', 'No cloud sync', 'No accounts, no logins', 'Works on a plane'].map(t => (
@@ -284,17 +289,16 @@ function PricingInline() {
     }}>
       <div className="stack-tight" style={{ gap: 12 }}>
         <div className="row" style={{ gap: 10 }}>
-          <span className="chip"><span className="chip-dot" /> ONE-TIME · NO SUBSCRIPTION</span>
+          <span className="chip"><span className="chip-dot" /> OPEN BETA · NO LICENSE REQUIRED</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, fontFamily: 'var(--font-mono)' }}>
-          <span style={{ fontSize: 64, fontWeight: 600, color: 'var(--site-fg)', letterSpacing: '-0.03em', lineHeight: 1 }}>$99</span>
-          <span style={{ fontSize: 13, color: 'var(--site-fg-2)' }}>USD · forever</span>
+          <span style={{ fontSize: 64, fontWeight: 600, color: 'var(--site-fg)', letterSpacing: '-0.03em', lineHeight: 1 }}>Free</span>
         </div>
         <p style={{ fontSize: 14, color: 'var(--site-fg-1)', maxWidth: 460, marginTop: 6 }}>
-          Includes the desktop app, LeftEar &amp; RightEar plugins, and every 1.x update. Use on up to two machines.
+          2ndEars is currently in an open beta program. Download it, use it, keep it — no license needed. Beta users keep their version forever.
         </p>
         <ul style={{ listStyle: 'none', padding: 0, margin: '12px 0 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          {['2-week free trial', 'License via email', 'Win 10+'].map(t => (
+          {['No license required', 'No card required', 'Keep your beta version forever', 'Win 10+'].map(t => (
             <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--site-fg-1)' }}>
               <span style={{ width: 14, height: 14, color: 'var(--site-accent)', flexShrink: 0 }}>
                 <svg width="14" height="14" viewBox="0 0 10 10"><path d="M2 5 L4.2 7.2 L8 3" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -306,10 +310,7 @@ function PricingInline() {
       </div>
       <div className="stack-tight" style={{ gap: 10, alignItems: 'stretch', minWidth: 240 }}>
         <a href={DOWNLOAD_URL} className="btn btn-primary" style={{ justifyContent: 'center', padding: '14px 20px', fontSize: 14 }}>
-          Download trial
-        </a>
-        <a href={BUY_URL} className="btn" style={{ justifyContent: 'center', padding: '14px 20px', fontSize: 14 }}>
-          Buy a license · $99
+          Download · free open beta
         </a>
       </div>
     </div>
