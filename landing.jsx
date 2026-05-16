@@ -74,7 +74,7 @@ function LandingB() {
         <div className="container">
           <div className="row-between" style={{ marginBottom: 18 }}>
             <span className="mono-l">FIG · 1 · DESKTOP APP, ROUTING TAB</span>
-            <span className="mono-tiny" style={{ color: 'var(--site-fg-3)' }}>placeholder · final screenshot t.b.d.</span>
+            {/* <span className="mono-tiny" style={{ color: 'var(--site-fg-3)' }}>placeholder · final screenshot t.b.d.</span> */}
           </div>
           <div className="app-mock-frame">
             <DesktopAppMock height={540} />
@@ -111,17 +111,17 @@ function LandingB() {
       </section>
 
       {/* ── 03 Demo video ──────────────────────────────────────────────── */}
-      <section className="section">
+      {/* <section className="section">
         <div className="container">
           <SectionLabel n="03" title="See it work" subtitle="1:42 · audio on" />
           <VideoPlaceholder height={520} />
         </div>
-      </section>
+      </section> */}
 
       {/* ── 04 Beginners + Pros ───────────────────────────────────────── */}
       <section className="section" style={{ background: 'var(--site-bg-2)' }}>
         <div className="container">
-          <SectionLabel n="04" title="Built for both ends of the room" />
+          <SectionLabel n="03" title="Built for both ends of the room" />
           <BeginnersAndProsInline />
         </div>
       </section>
@@ -129,7 +129,7 @@ function LandingB() {
       {/* ── 05 Privacy ─────────────────────────────────────────────────── */}
       <section className="section">
         <div className="container">
-          <SectionLabel n="05" title="Privacy" subtitle="Offline by default" />
+          <SectionLabel n="04" title="Privacy" subtitle="Offline by default" />
           <PrivacyInline />
         </div>
       </section>
@@ -137,7 +137,7 @@ function LandingB() {
       {/* ── 06 Features ────────────────────────────────────────────────── */}
       <section className="section" id="features" style={{ background: 'var(--site-bg-2)' }}>
         <div className="container">
-          <SectionLabel n="06" title="Features" subtitle="Four engines · one chat" />
+          <SectionLabel n="05" title="Features" subtitle="Four engines · one chat" />
           <div style={{ borderTop: '1px solid var(--site-line)' }}>
             {FEATURES.map(([label, desc], i) => (
               <div key={label} style={{
@@ -158,7 +158,7 @@ function LandingB() {
       {/* ── 07 Pricing ─────────────────────────────────────────────────── */}
       <section className="section" id="pricing">
         <div className="container">
-          <SectionLabel n="07" title="Pricing" subtitle="Open beta · free to use" />
+          <SectionLabel n="06" title="Pricing" subtitle="Open beta · free to use" />
           <PricingInline />
         </div>
       </section>
@@ -166,7 +166,7 @@ function LandingB() {
       {/* ── 08 System requirements ──────────────────────────────────────── */}
       <section className="section-narrow" id="requirements">
         <div className="container">
-          <SectionLabel n="08" title="System requirements" />
+          <SectionLabel n="07" title="System requirements" />
           <div className="grid-2" style={{ gap: 32 }}>
             <div style={{ paddingTop: 16, borderTop: '1px solid var(--site-line)' }}>
               <span className="mono-l" style={{ display: 'block', marginBottom: 20 }}>MINIMUM</span>
