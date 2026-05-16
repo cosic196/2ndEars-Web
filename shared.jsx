@@ -4,7 +4,7 @@ const EMAIL = 'info@2ndears.com';
 const PRICE = '$99';
 const TRIAL = '2-week free trial';
 const BUY_URL = '#';        // wire to polar.sh later
-const DOWNLOAD_URL = 'https://github.com/cosic196/2ndEars-Web/releases/download/v0.1.0/2ndEars-Downloader-0.1.0.exe';
+const DOWNLOAD_URL = 'https://github.com/cosic196/2ndEars-Web/releases/latest/download/2ndEars-Downloader.exe';
 
 // ─── Download gate ──────────────────────────────────────────────────────────
 // 2ndEars is in open beta and not yet code-signed, so Windows shows a
