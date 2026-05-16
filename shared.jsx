@@ -4,20 +4,70 @@ const EMAIL = 'info@2ndears.com';
 const PRICE = '$99';
 const TRIAL = '2-week free trial';
 const BUY_URL = '#';        // wire to polar.sh later
-const DOWNLOAD_URL = 'https://github.com/cosic196/2ndEars-Web/releases/latest/download/2ndEars-Downloader.exe';
+const DOWNLOAD_URLS = {
+  windows: 'https://github.com/cosic196/2ndEars-Web/releases/latest/download/2ndEars-Downloader.exe',
+  macos:   'https://github.com/cosic196/2ndEars-Web/releases/latest/download/2ndEars-Downloader.dmg',
+};
+// Legacy alias — kept so any stray reference still resolves to something.
+const DOWNLOAD_URL = DOWNLOAD_URLS.windows;
+
+const PLATFORMS = {
+  windows: { id: 'windows', label: 'Windows', short: 'Win',   ext: '.exe', req: 'Windows 10+' },
+  macos:   { id: 'macos',   label: 'macOS',   short: 'macOS', ext: '.dmg', req: 'macOS 12+'   },
+};
+
+// ─── Platform detection ─────────────────────────────────────────────────────
+function detectPlatform() {
+  if (typeof navigator === 'undefined') return 'windows';
+  const ua = (navigator.userAgent || '') + ' ' + (navigator.platform || '');
+  if (/Mac|iPhone|iPad|iPod/i.test(ua)) return 'macos';
+  return 'windows'; // default — the product is Win-first
+}
+
+// Global shared state for chosen platform + UI pattern. Lives on window so the
+// modal + every button stay in sync via a tiny event-bus (no React context needed
+// since handlers fire from anywhere).
+window.__downloadState = window.__downloadState || {
+  platform: detectPlatform(),       // 'windows' | 'macos'
+  forcedPlatform: null,             // null = auto-detected; else override
+  pattern: 'side-by-side',          // 'auto-toggle' | 'side-by-side' | 'picker-modal'
+  listeners: new Set(),
+};
+
+function useDownloadState() {
+  const [, force] = React.useReducer(x => x + 1, 0);
+  React.useEffect(() => {
+    window.__downloadState.listeners.add(force);
+    return () => window.__downloadState.listeners.delete(force);
+  }, []);
+  const st = window.__downloadState;
+  return {
+    platform: st.forcedPlatform || st.platform,
+    forcedPlatform: st.forcedPlatform,
+    pattern: st.pattern,
+    setPlatform: (p) => { st.platform = p; st.listeners.forEach(fn => fn()); },
+    setForcedPlatform: (p) => { st.forcedPlatform = p; st.listeners.forEach(fn => fn()); },
+    setPattern: (p) => { st.pattern = p; st.listeners.forEach(fn => fn()); },
+  };
+}
 
 // ─── Download gate ──────────────────────────────────────────────────────────
-// 2ndEars is in open beta and not yet code-signed, so Windows shows a
-// SmartScreen warning during install and the browser warns about the .exe.
-// We intercept every Download click and show a modal that walks the user
-// through the warnings before the file starts downloading.
-function handleDownloadClick(e) {
+// 2ndEars is in open beta. The Windows build is unsigned (SmartScreen); the
+// macOS build is signed but not notarized (Gatekeeper still warns). Every
+// Download click opens a platform-aware modal that walks the user through
+// the OS-specific warnings before the file starts downloading.
+function handleDownloadClick(e, platformOverride) {
   if (e && e.preventDefault) e.preventDefault();
+  if (platformOverride) {
+    window.__downloadState.platform = platformOverride;
+    window.__downloadState.forcedPlatform = null;
+    window.__downloadState.listeners.forEach(fn => fn());
+  }
   if (typeof window.__openDownloadModal === 'function') {
     window.__openDownloadModal();
   } else {
-    // Fallback: modal never mounted — just navigate.
-    window.location.href = DOWNLOAD_URL;
+    const p = platformOverride || window.__downloadState.platform;
+    window.location.href = DOWNLOAD_URLS[p] || DOWNLOAD_URLS.windows;
   }
 }
 
@@ -58,7 +108,7 @@ const HOW_IT_WORKS = [
   {
     step: '03',
     name: '2ndEars',
-    role: 'Desktop app · Windows',
+    role: 'Desktop app · Win + macOS',
     body: 'Receives audio, rebuilds Sources → Buses → Master, runs analysis, and hosts the chat. Click any node to audition it in isolation. Ask anything in plain English.',
     spec: ['Routing · Analysis · Masking', 'Local AI'],
   },
@@ -148,7 +198,7 @@ function Footer() {
         <div className="foot-col" style={{ alignItems: 'flex-end' }}>
           <span className="foot-meta">BETA</span>
           <span style={{ fontSize: 11, color: 'var(--site-fg-3)', fontFamily: 'var(--font-mono)' }}>
-            Windows · VST3
+            Windows · macOS · VST3
           </span>
           <span style={{ fontSize: 11, color: 'var(--site-fg-3)', fontFamily: 'var(--font-mono)' }}>
             © 2026 2ndEars
@@ -316,7 +366,7 @@ function PricingCard({ id = 'pricing' }) {
                 'No license required',
                 'No card required',
                 'Keep your beta version forever',
-                'Windows 10+',
+                'Windows 10+ · macOS 12+',
               ].map(t => (
                 <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--site-fg-1)' }}>
                   <span style={{ width: 14, height: 14, color: 'var(--site-accent)', flexShrink: 0 }}>
@@ -417,11 +467,158 @@ function BeginnersAndPros() {
   );
 }
 
-// ─── Windows warning: pre-download modal ───────────────────────────────────
-// Mounts once at the page root. Other components trigger it by calling
-// window.__openDownloadModal(), which handleDownloadClick wires up.
-function WindowsWarningModal() {
+// ─── OS picker (segmented toggle) ──────────────────────────────────────────
+function OSGlyph({ id, size = 12 }) {
+  if (id === 'macos') {
+    return (
+      <svg width={size} height={size} viewBox="0 0 12 12" aria-hidden="true" style={{ flexShrink: 0 }}>
+        <path d="M6 4.2 Q6 2 7.6 2 Q9.2 2 9.2 3.5 Q9.2 5 7.6 5 H4.4 Q2.8 5 2.8 6.5 Q2.8 8 4.4 8 Q6 8 6 5.8 V4.2 Z M6 4.2 Q6 5.8 6 7.4" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" opacity="0.85" />
+        <circle cx="6" cy="6" r="0.9" fill="currentColor" />
+      </svg>
+    );
+  }
+  // windows — 4-pane glyph
+  return (
+    <svg width={size} height={size} viewBox="0 0 12 12" aria-hidden="true" style={{ flexShrink: 0 }}>
+      <rect x="1.8" y="1.8" width="3.6" height="3.6" fill="currentColor" opacity="0.85" />
+      <rect x="6.6" y="1.8" width="3.6" height="3.6" fill="currentColor" opacity="0.85" />
+      <rect x="1.8" y="6.6" width="3.6" height="3.6" fill="currentColor" opacity="0.85" />
+      <rect x="6.6" y="6.6" width="3.6" height="3.6" fill="currentColor" opacity="0.85" />
+    </svg>
+  );
+}
+
+function OSSwitch({ value, onChange, size = 'md' }) {
+  const compact = size === 'sm';
+  return (
+    <div className={`os-switch ${compact ? 'os-switch--sm' : ''}`} role="tablist" aria-label="Choose platform">
+      {['windows', 'macos'].map((p) => {
+        const active = value === p;
+        return (
+          <button
+            key={p}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            className={`os-switch__btn ${active ? 'is-active' : ''}`}
+            onClick={(e) => { e.preventDefault(); onChange(p); }}
+          >
+            <OSGlyph id={p} size={compact ? 10 : 11} />
+            <span>{PLATFORMS[p].label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── DownloadButton: the unified CTA used by hero / pricing / nav ──────────
+// Patterns (switchable via Tweaks):
+//   • 'auto-toggle'    — primary button labeled "Download for <OS>" with a
+//                        small OS toggle directly under it.
+//   • 'side-by-side'   — two equal buttons: "Download for Windows" / "...macOS".
+//   • 'picker-modal'   — single neutral "Download" button; modal asks platform first.
+function DownloadButton({ size = 'md', variant = 'primary', showHint = true, align = 'center', forcePattern, hideToggle = false }) {
+  const { platform, setPlatform, pattern } = useDownloadState();
+  const usePattern = forcePattern || pattern;
+  const big = size === 'lg';
+  const padding = big ? '14px 22px' : (size === 'sm' ? '8px 14px' : '11px 18px');
+  const fontSize = big ? 14 : (size === 'sm' ? 12.5 : 13);
+  const btnClass = `btn ${variant === 'primary' ? 'btn-primary' : ''}`;
+
+  if (usePattern === 'side-by-side') {
+    return (
+      <div className="dl-cta-wrap" style={{ alignItems: align === 'left' ? 'flex-start' : 'stretch' }}>
+        <div className="dl-side-row">
+          {['windows', 'macos'].map((p) => (
+            <a
+              key={p}
+              href={DOWNLOAD_URLS[p]}
+              onClick={(e) => handleDownloadClick(e, p)}
+              className={`btn ${p === platform ? 'btn-primary' : ''}`}
+              style={{ padding, fontSize, justifyContent: 'center', gap: 9 }}
+            >
+              <OSGlyph id={p} size={13} />
+              <span>Download for {PLATFORMS[p].label}</span>
+            </a>
+          ))}
+        </div>
+        {showHint && <DownloadHint align={align} />}
+      </div>
+    );
+  }
+
+  if (usePattern === 'picker-modal') {
+    return (
+      <div className="dl-cta-wrap" style={{ alignItems: align === 'left' ? 'flex-start' : 'stretch' }}>
+        <a
+          href={DOWNLOAD_URLS[platform]}
+          onClick={(e) => handleDownloadClick(e)}
+          className={btnClass}
+          style={{ padding, fontSize, justifyContent: 'center' }}
+        >
+          Download · free open beta
+        </a>
+        {showHint && <DownloadHint align={align} />}
+      </div>
+    );
+  }
+
+  // auto-toggle (default): big button labeled with detected OS + toggle below
+  return (
+    <div className="dl-cta-wrap" style={{ alignItems: align === 'left' ? 'flex-start' : 'stretch' }}>
+      <a
+        href={DOWNLOAD_URLS[platform]}
+        onClick={(e) => handleDownloadClick(e, platform)}
+        className={btnClass}
+        style={{ padding, fontSize, justifyContent: 'center', gap: 9 }}
+      >
+        <OSGlyph id={platform} size={big ? 15 : 13} />
+        <span>Download for {PLATFORMS[platform].label}</span>
+        <span style={{ opacity: 0.6, fontWeight: 500 }}>· free open beta</span>
+      </a>
+      {!hideToggle && (
+        <div className="dl-os-row" style={{ justifyContent: align === 'left' ? 'flex-start' : 'center' }}>
+          <span className="mono-tiny" style={{ color: 'var(--site-fg-3)' }}>OR</span>
+          <OSSwitch value={platform} onChange={(p) => setPlatform(p)} size="sm" />
+        </div>
+      )}
+      {showHint && <DownloadHint align={align} />}
+    </div>
+  );
+}
+
+// ─── Inline "warning" hint under each Download button ──────────────────────
+function DownloadHint({ align = 'center' }) {
+  const { platform } = useDownloadState();
+  const copy = platform === 'macos'
+    ? 'Signed beta · how to skip the macOS Gatekeeper warning'
+    : 'Unsigned beta · how to skip the Windows warning';
+  return (
+    <button
+      type="button"
+      className="dl-warn-link"
+      onClick={(e) => handleDownloadClick(e)}
+      style={{ justifyContent: align === 'left' ? 'flex-start' : 'center' }}
+    >
+      <svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true">
+        <path d="M6 1 L11 10.5 L1 10.5 Z" fill="none" stroke="currentColor" strokeWidth="1" strokeLinejoin="round" />
+        <path d="M6 5 V7.5 M6 9 v0.1" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+      </svg>
+      <span>{copy}</span>
+    </button>
+  );
+}
+
+// Back-compat alias — landing.jsx imports it by this name.
+const WindowsWarningNote = DownloadHint;
+
+// ─── Pre-download modal — platform-aware ───────────────────────────────────
+// One modal handles both OSes. The platform tabs at the top let the user
+// switch; the step list rewrites in place. Mounts once at the page root.
+function DownloadModal() {
   const [open, setOpen] = React.useState(false);
+  const { platform, setPlatform } = useDownloadState();
 
   React.useEffect(() => {
     window.__openDownloadModal = () => setOpen(true);
@@ -443,10 +640,13 @@ function WindowsWarningModal() {
   if (!open) return null;
 
   const close = () => setOpen(false);
-  const proceed = () => {
+  const proceed = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
     setOpen(false);
-    window.location.href = DOWNLOAD_URL;
+    setTimeout(() => { window.location.href = DOWNLOAD_URLS[platform]; }, 60);
   };
+
+  const isMac = platform === 'macos';
 
   return (
     <div className="dl-modal-backdrop" onClick={close}>
@@ -458,54 +658,105 @@ function WindowsWarningModal() {
         onClick={(e) => e.stopPropagation()}
       >
         <button className="dl-modal-close" onClick={close} aria-label="Close">×</button>
-        <span className="mono-l label-accent">HEADS UP · WINDOWS WARNING</span>
-        <h2 id="dl-modal-title" className="dl-modal-title">Windows will warn you. That's expected.</h2>
+
+        <div className="dl-modal-platform">
+          <span className="mono-l" style={{ color: 'var(--site-fg-3)' }}>PLATFORM</span>
+          <OSSwitch value={platform} onChange={setPlatform} />
+        </div>
+
+        <span className="mono-l label-accent">
+          {isMac ? 'HEADS UP · MACOS GATEKEEPER' : 'HEADS UP · WINDOWS SMARTSCREEN'}
+        </span>
+        <h2 id="dl-modal-title" className="dl-modal-title">
+          {isMac
+            ? "Your Mac will warn you. That's expected."
+            : "Windows will warn you. That's expected."}
+        </h2>
         <p className="dl-modal-lede">
-          2ndEars is in open beta and not yet code-signed, so Windows will flag it as
-          coming from an "unknown publisher". It's safe to install — here's how to
-          get past the two warnings you'll see.
+          {isMac ? (
+            <>2ndEars is in open beta. The build is code-signed but not yet notarized,
+            so Gatekeeper will warn that Apple <em>"cannot check it for malicious software"</em>.
+            It's safe to install — here's how to get past the warning on any macOS version.</>
+          ) : (
+            <>2ndEars is in open beta and not yet code-signed, so Windows will flag it as
+            coming from an "unknown publisher". It's safe to install — here's how to
+            get past the two warnings you'll see.</>
+          )}
         </p>
 
-        <ol className="dl-steps">
-          <li>
-            <span className="dl-step-n">1</span>
-            <div className="dl-step-body">
-              <h3>Your browser may flag the download</h3>
-              <p>
-                If Chrome or Edge says <em>"this file isn't commonly downloaded"</em>,
-                click <strong>Keep</strong> (Chrome) or the <strong>⋯ menu → Keep</strong> (Edge).
-              </p>
-            </div>
-          </li>
-          <li>
-            <span className="dl-step-n">2</span>
-            <div className="dl-step-body">
-              <h3>SmartScreen appears when you run the installer</h3>
-              <p>
-                You'll see <em>"Windows protected your PC"</em>. Click the small
-                <strong> More info</strong> link, then the <strong>Run anyway</strong> button
-                that appears.
-              </p>
-            </div>
-          </li>
-          <li>
-            <span className="dl-step-n">3</span>
-            <div className="dl-step-body">
-              <h3>UAC will ask for permission</h3>
-              <p>Windows asks whether to allow changes for the install. Click <strong>Yes</strong>.</p>
-            </div>
-          </li>
-        </ol>
+        {isMac ? (
+          <ol className="dl-steps">
+            <li>
+              <span className="dl-step-n">1</span>
+              <div className="dl-step-body">
+                <h3>Open the .dmg, drag 2ndEars to Applications</h3>
+                <p>Double-click the downloaded <strong>2ndEars-Downloader.dmg</strong>,
+                then drag the <strong>2ndEars</strong> icon onto the <strong>Applications</strong> folder shortcut inside the window.</p>
+              </div>
+            </li>
+            <li>
+              <span className="dl-step-n">2</span>
+              <div className="dl-step-body">
+                <h3>First launch — right-click → Open</h3>
+                <p>Open <strong>Applications</strong>, <strong>right-click</strong> (or Control-click)
+                <em> 2ndEars</em>, choose <strong>Open</strong>, then click <strong>Open</strong> again
+                in the dialog that appears. <span style={{ color: 'var(--site-fg-3)' }}>You only need to do this once.</span></p>
+              </div>
+            </li>
+            <li>
+              <span className="dl-step-n">3</span>
+              <div className="dl-step-body">
+                <h3>On macOS Sequoia (15) or later</h3>
+                <p>Apple removed the right-click shortcut. Instead, try to open 2ndEars normally
+                (Gatekeeper will block it), then open <strong>System Settings → Privacy &amp; Security</strong>,
+                scroll down to <em>"2ndEars was blocked from use…"</em> and click <strong>Open Anyway</strong>.</p>
+              </div>
+            </li>
+          </ol>
+        ) : (
+          <ol className="dl-steps">
+            <li>
+              <span className="dl-step-n">1</span>
+              <div className="dl-step-body">
+                <h3>Your browser may flag the download</h3>
+                <p>
+                  If Chrome or Edge says <em>"this file isn't commonly downloaded"</em>,
+                  click <strong>Keep</strong> (Chrome) or the <strong>⋯ menu → Keep</strong> (Edge).
+                </p>
+              </div>
+            </li>
+            <li>
+              <span className="dl-step-n">2</span>
+              <div className="dl-step-body">
+                <h3>SmartScreen appears when you run the installer</h3>
+                <p>
+                  You'll see <em>"Windows protected your PC"</em>. Click the small
+                  <strong> More info</strong> link, then the <strong>Run anyway</strong> button
+                  that appears.
+                </p>
+              </div>
+            </li>
+            <li>
+              <span className="dl-step-n">3</span>
+              <div className="dl-step-body">
+                <h3>UAC will ask for permission</h3>
+                <p>Windows asks whether to allow changes for the install. Click <strong>Yes</strong>.</p>
+              </div>
+            </li>
+          </ol>
+        )}
 
         <p className="dl-modal-fine">
-          A signing certificate is on the roadmap before 1.0. For now, beta builds
-          stay unsigned so we can ship updates quickly.
+          {isMac
+            ? 'Apple notarization is on the roadmap before 1.0. For now, the macOS beta stays un-notarized so we can ship updates quickly.'
+            : 'A signing certificate is on the roadmap before 1.0. For now, the Windows beta stays unsigned so we can ship updates quickly.'}
         </p>
 
         <div className="dl-modal-actions">
           <button type="button" className="btn btn-ghost" onClick={close}>Cancel</button>
-          <a className="btn btn-primary" href={DOWNLOAD_URL} onClick={proceed}>
-            Got it · Download
+          <a className="btn btn-primary" href={DOWNLOAD_URLS[platform]} onClick={proceed} style={{ gap: 9 }}>
+            <OSGlyph id={platform} size={13} />
+            <span>Got it · Download {PLATFORMS[platform].ext}</span>
           </a>
         </div>
       </div>
@@ -513,29 +764,15 @@ function WindowsWarningModal() {
   );
 }
 
-// Small inline link placed under prominent Download buttons. Opens the same
-// modal so users who closed it (or want to read first) can re-open it.
-function WindowsWarningNote({ align = 'center' }) {
-  return (
-    <button
-      type="button"
-      className="dl-warn-link"
-      onClick={handleDownloadClick}
-      style={{ justifyContent: align === 'left' ? 'flex-start' : 'center' }}
-    >
-      <svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true">
-        <path d="M6 1 L11 10.5 L1 10.5 Z" fill="none" stroke="currentColor" strokeWidth="1" strokeLinejoin="round" />
-        <path d="M6 5 V7.5 M6 9 v0.1" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
-      </svg>
-      <span>Unsigned beta · how to skip the Windows warning</span>
-    </button>
-  );
-}
+// Back-compat alias — landing.jsx mounts this name at the page root.
+const WindowsWarningModal = DownloadModal;
 
 Object.assign(window, {
-  EMAIL, PRICE, TRIAL, BUY_URL, DOWNLOAD_URL,
+  EMAIL, PRICE, TRIAL, BUY_URL, DOWNLOAD_URL, DOWNLOAD_URLS, PLATFORMS,
   VALUE_PROPS, HOW_IT_WORKS, FEATURES, FAQ,
   Logo, NavBar, BuyCta, Footer,
   PrivacyCallout, PrivacyDiagram, PricingCard, FeatureList, BeginnersAndPros,
-  WindowsWarningModal, WindowsWarningNote, handleDownloadClick,
+  WindowsWarningModal, WindowsWarningNote, DownloadModal, DownloadHint,
+  DownloadButton, OSSwitch, OSGlyph,
+  detectPlatform, useDownloadState, handleDownloadClick,
 });

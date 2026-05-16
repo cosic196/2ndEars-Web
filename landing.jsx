@@ -36,13 +36,10 @@ function LandingB() {
               <div className="dashed-hr" />
               <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 18, rowGap: 8, fontFamily: 'var(--font-mono)' }}>
                 <span className="mono-l">STATUS</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>Open beta · free</span>
-                <span className="mono-l">RUNS ON</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>Windows · macOS (coming soon)</span>
+                <span className="mono-l">RUNS ON</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>Windows · macOS</span>
                 <span className="mono-l">FORMATS</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>VST3</span>
               </div>
-              <a href={DOWNLOAD_URL} onClick={handleDownloadClick} className="btn btn-primary" style={{ padding: '11px 18px', fontSize: 13 }}>
-                Download · free open beta
-              </a>
-              <WindowsWarningNote align="left" />
+              <DownloadButton size="md" align="left" />
             </div>
           </div>
         </div>
@@ -171,6 +168,8 @@ function LandingB() {
             <div style={{ paddingTop: 16, borderTop: '1px solid var(--site-line)' }}>
               <span className="mono-l" style={{ display: 'block', marginBottom: 20 }}>MINIMUM</span>
               <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 18, rowGap: 8 }}>
+                <span className="mono-l">OS</span>
+                <span style={{ fontSize: 12, color: 'var(--site-fg-1)', fontFamily: 'var(--font-mono)' }}>Win 10+ · macOS 12+</span>
                 <span className="mono-l">RAM</span>
                 <span style={{ fontSize: 12, color: 'var(--site-fg-1)', fontFamily: 'var(--font-mono)' }}>16 GB</span>
                 <span className="mono-l">DISK</span>
@@ -180,6 +179,8 @@ function LandingB() {
             <div style={{ paddingTop: 16, borderTop: '1px solid var(--site-line)' }}>
               <span className="mono-l" style={{ display: 'block', marginBottom: 20 }}>RECOMMENDED</span>
               <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 18, rowGap: 8 }}>
+                <span className="mono-l">OS</span>
+                <span style={{ fontSize: 12, color: 'var(--site-fg-1)', fontFamily: 'var(--font-mono)' }}>Win 11 · macOS 14+ (Apple Silicon)</span>
                 <span className="mono-l">RAM</span>
                 <span style={{ fontSize: 12, color: 'var(--site-fg-1)', fontFamily: 'var(--font-mono)' }}>32 GB · or 16 GB + GTX 1060</span>
                 <span className="mono-l">DISK</span>
@@ -236,16 +237,16 @@ function BeginnersAndProsInline() {
         <p style={{ fontSize: 15, color: 'var(--site-fg-1)', lineHeight: 1.6 }}>
           You've been mixing for six hours. Your ears are gone. 2ndEars surfaces what you stopped noticing — masking conflicts, dynamic-range drops, stereo imbalance on a vocal that drifted at hour three. No taste, no bias. Just measurements.
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginTop: 8 }}>
+        <div className="pro-metrics" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginTop: 8 }}>
           {[
             ['LUFS', '−14.2'],
             ['PEAK', '−1.0'],
             ['CREST', '11.4'],
             ['WIDTH', '0.62'],
             ['DR', '8.2'],
-            ['MASK', '3 high'],
+            ['MASKING', 'Low-end'],
           ].map(([k, v]) => (
-            <div key={k} style={{ padding: '12px 14px', background: 'var(--site-card)', border: '1px solid var(--site-line)', borderRadius: 6 }}>
+            <div key={k} className="pro-metric-cell" style={{ padding: '12px 14px', background: 'var(--site-card)', border: '1px solid var(--site-line)', borderRadius: 6 }}>
               <div className="mono-l" style={{ fontSize: 9.5 }}>{k}</div>
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 18, fontWeight: 500, color: 'var(--site-fg)', marginTop: 2 }}>{v}</div>
             </div>
@@ -300,7 +301,7 @@ function PricingInline() {
           2ndEars is currently in an open beta program. Download it, use it, keep it — no license needed. Beta users keep their version forever.
         </p>
         <ul style={{ listStyle: 'none', padding: 0, margin: '12px 0 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          {['No license required', 'No card required', 'Keep your beta version forever', 'Win 10+'].map(t => (
+          {['No license required', 'No card required', 'Keep your beta version forever', 'Win 10+ · macOS 12+'].map(t => (
             <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--site-fg-1)' }}>
               <span style={{ width: 14, height: 14, color: 'var(--site-accent)', flexShrink: 0 }}>
                 <svg width="14" height="14" viewBox="0 0 10 10"><path d="M2 5 L4.2 7.2 L8 3" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
@@ -311,10 +312,7 @@ function PricingInline() {
         </ul>
       </div>
       <div className="stack-tight" style={{ gap: 10, alignItems: 'stretch', minWidth: 240 }}>
-        <a href={DOWNLOAD_URL} onClick={handleDownloadClick} className="btn btn-primary" style={{ justifyContent: 'center', padding: '14px 20px', fontSize: 14 }}>
-          Download · free open beta
-        </a>
-        <WindowsWarningNote />
+        <DownloadButton size="lg" align="center" />
       </div>
     </div>
   );
