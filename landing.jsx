@@ -244,7 +244,7 @@ function BeginnersAndProsInline() {
             ['CREST', '11.4'],
             ['WIDTH', '0.62'],
             ['DR', '8.2'],
-            ['MASK', '3 high'],
+            ['MASKING', 'Low-end'],
           ].map(([k, v]) => (
             <div key={k} className="pro-metric-cell" style={{ padding: '12px 14px', background: 'var(--site-card)', border: '1px solid var(--site-line)', borderRadius: 6 }}>
               <div className="mono-l" style={{ fontSize: 9.5 }}>{k}</div>
