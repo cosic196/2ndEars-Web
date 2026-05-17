@@ -581,6 +581,29 @@ function FullscreenShot({ shot, idx, total, originRect, onClose, onPrev, onNext 
     window.setTimeout(onClose, 320);
   }, [computeOriginTransform, onClose]);
 
+  // Keep a stable ref to beginClose so the history effect doesn't re-run
+  const beginCloseRef = React.useRef(beginClose);
+  React.useLayoutEffect(() => { beginCloseRef.current = beginClose; }, [beginClose]);
+
+  // Push a history entry so the mobile back button closes the lightbox instead
+  // of navigating away. On unmount, pop the entry if the user didn't already
+  // dismiss via back (which would have already popped it).
+  React.useEffect(() => {
+    const popped = { v: false };
+    history.pushState({ lightbox: true }, '');
+
+    function onPopState() {
+      popped.v = true;
+      beginCloseRef.current();
+    }
+
+    window.addEventListener('popstate', onPopState);
+    return () => {
+      window.removeEventListener('popstate', onPopState);
+      if (!popped.v) history.back();
+    };
+  }, []);
+
   // keyboard
   React.useEffect(() => {
     function onKey(e) {
