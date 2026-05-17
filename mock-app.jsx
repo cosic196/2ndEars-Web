@@ -285,8 +285,474 @@ function RoutingGraphIllustration({ active = 'Master', height = 320 }) {
   );
 }
 
-// ─── Full desktop app mock (a faked window) ─────────────────────────────────
+// ─── Full desktop app figure (real screenshots, tabbed) ────────────────────
+const APP_SHOTS = [
+  { id: 'routing',  label: 'Routing',  caption: 'Sources → Buses → Master. Click a node to audition that stem.', src: 'assets/screenshot-routing.png' },
+  { id: 'analysis', label: 'Analysis', caption: 'Per-track spectrum, LUFS & peak.',     src: 'assets/screenshot-analysis.png' },
+  { id: 'masking',  label: 'Masking',  caption: 'Conflict patterns with computed fixes.', src: 'assets/screenshot-masking.png' },
+];
+
+function Chevron({ dir = 'right', size = 14 }) {
+  const d = dir === 'right' ? 'M3 1 L7 5 L3 9' : 'M7 1 L3 5 L7 9';
+  return (
+    <svg width={size} height={size} viewBox="0 0 10 10" aria-hidden="true">
+      <path d={d} stroke="currentColor" strokeWidth="1.3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ArrowButton({ dir, onClick, ariaLabel, style, className }) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); onClick(); }}
+      aria-label={ariaLabel}
+      className={`shots-arrow${className ? ' ' + className : ''}`}
+      style={{
+        width: 40, height: 40, borderRadius: 999,
+        background: 'color-mix(in oklch, var(--bg-0) 78%, transparent)',
+        border: '1px solid var(--line-1)',
+        color: 'var(--fg-0)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        cursor: 'pointer',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)',
+        transition: 'background 0.12s ease, border-color 0.12s ease',
+        ...style,
+      }}>
+      <Chevron dir={dir} size={14} />
+    </button>
+  );
+}
+
 function DesktopAppMock({ height = 540 }) {
+  const [idx, setIdx] = React.useState(0);
+  const [fs, setFs] = React.useState(false);
+  // Aspect ratio auto-detected from the first loaded screenshot. Fallback
+  // matches the originals (1442 × 722) until the image's onLoad fires.
+  const [aspectRatio, setAspectRatio] = React.useState('1442 / 722');
+  const cardRef = React.useRef(null);
+  const [originRect, setOriginRect] = React.useState(null);
+  const shot = APP_SHOTS[idx];
+  const total = APP_SHOTS.length;
+
+  const next = React.useCallback(() => setIdx(i => (i + 1) % total), [total]);
+  const prev = React.useCallback(() => setIdx(i => (i - 1 + total) % total), [total]);
+
+  // capture inline-image rect so lightbox can zoom OUT of it on close
+  const openFs = React.useCallback(() => {
+    if (cardRef.current) {
+      const r = cardRef.current.getBoundingClientRect();
+      setOriginRect({ left: r.left, top: r.top, width: r.width, height: r.height });
+    }
+    setFs(true);
+  }, []);
+
+  // Touch swipe — horizontal drag past a threshold cycles screenshots
+  const touchRef = React.useRef({ startX: 0, startY: 0, active: false, decided: false });
+  const onTouchStart = React.useCallback((e) => {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    touchRef.current = { startX: t.clientX, startY: t.clientY, active: true, decided: false, axis: null };
+  }, []);
+  const onTouchMove = React.useCallback((e) => {
+    const s = touchRef.current;
+    if (!s.active || e.touches.length !== 1) return;
+    if (s.axis) return; // already decided
+    const t = e.touches[0];
+    const dx = t.clientX - s.startX;
+    const dy = t.clientY - s.startY;
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+      s.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+    }
+  }, []);
+  const onTouchEnd = React.useCallback((e) => {
+    const s = touchRef.current;
+    if (!s.active) return;
+    const t = (e.changedTouches && e.changedTouches[0]) || null;
+    const dx = t ? t.clientX - s.startX : 0;
+    s.active = false;
+    if (s.axis === 'x' && Math.abs(dx) > 40) {
+      // swipe — also cancel the click-to-fullscreen that would fire next
+      s.swiped = true;
+      if (dx < 0) next(); else prev();
+    } else {
+      s.swiped = false;
+    }
+  }, [next, prev]);
+  const onCardClick = React.useCallback(() => {
+    // Skip opening fullscreen if this click was really a swipe-end
+    if (touchRef.current.swiped) { touchRef.current.swiped = false; return; }
+    openFs();
+  }, [openFs]);
+
+  const indicator = (
+    <span className="mono-tiny" style={{ color: 'var(--fg-2)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+      <span style={{ color: 'var(--fg-0)' }}>{String(idx + 1).padStart(2, '0')}</span>
+      <span style={{ opacity: 0.5 }}> / {String(total).padStart(2, '0')}</span>
+      <span style={{ margin: '0 8px', opacity: 0.5 }}>·</span>
+      <span style={{ color: 'var(--signal)' }}>{shot.label}</span>
+      <span style={{ margin: '0 8px', opacity: 0.5 }}>·</span>
+      <span style={{ color: 'var(--fg-1)', textTransform: 'none', letterSpacing: '0.02em' }}>{shot.caption}</span>
+    </span>
+  );
+
+  return (
+    <>
+      <div
+        className="app-shots"
+        style={{ width: '100%', position: 'relative' }}
+      >
+        {/* image card — click to open fullscreen */}
+        <div
+          ref={cardRef}
+          onClick={onCardClick}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          role="button"
+          tabIndex={0}
+          aria-label={`Open ${shot.label} screenshot fullscreen`}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFs(); }
+            else if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
+            else if (e.key === 'ArrowLeft')  { e.preventDefault(); prev(); }
+          }}
+          style={{
+            width: '100%',
+            borderRadius: 10,
+            overflow: 'hidden',
+            background: 'var(--bg-0)',
+            border: '1px solid var(--line-0)',
+            boxShadow: '0 32px 80px -24px rgba(0,0,0,.6), 0 0 0 1px oklch(0.22 0.006 60)',
+            aspectRatio,
+            position: 'relative',
+            cursor: 'zoom-in',
+            touchAction: 'pan-y', // allow vertical scroll, capture horizontal
+            WebkitTapHighlightColor: 'transparent',
+            userSelect: 'none',
+          }}>
+          {/* sliding strip */}
+          <div
+            className="shots-strip"
+            style={{
+              position: 'absolute', inset: 0,
+              display: 'flex',
+              width: `${total * 100}%`,
+              transform: `translate3d(-${idx * (100 / total)}%, 0, 0)`,
+              transition: 'transform 0.5s cubic-bezier(0.65, 0, 0.2, 1)',
+              willChange: 'transform',
+            }}>
+            {APP_SHOTS.map((s, i) => (
+              <div
+                key={s.id}
+                style={{
+                  width: `${100 / total}%`,
+                  height: '100%',
+                  flexShrink: 0,
+                  position: 'relative',
+                }}>
+                <img
+                  src={s.src}
+                  alt={`2ndEars — ${s.label} tab`}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  onLoad={i === 0 ? (e) => {
+                    const im = e.currentTarget;
+                    if (im.naturalWidth && im.naturalHeight) {
+                      setAspectRatio(`${im.naturalWidth} / ${im.naturalHeight}`);
+                    }
+                  } : undefined}
+                  style={{
+                    width: '100%', height: '100%',
+                    display: 'block', objectFit: 'cover',
+                    // hide the active image while the lightbox is open (it's
+                    // visually replaced by the zooming lightbox image — this
+                    // makes the FLIP-style zoom-out feel like the same image)
+                    visibility: (fs && i === idx) ? 'hidden' : 'visible',
+                  }}
+                  draggable={false}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* arrows positioned over the image */}
+          <ArrowButton
+            dir="left"
+            ariaLabel="Previous screenshot"
+            onClick={prev}
+            style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', zIndex: 2 }}
+          />
+          <ArrowButton
+            dir="right"
+            ariaLabel="Next screenshot"
+            onClick={next}
+            style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', zIndex: 2 }}
+          />
+
+          {/* dot indicators bottom-center */}
+          <div style={{
+            position: 'absolute', bottom: 14, left: '50%', transform: 'translateX(-50%)',
+            display: 'flex', gap: 6, padding: '6px 10px',
+            background: 'color-mix(in oklch, var(--bg-0) 78%, transparent)',
+            border: '1px solid var(--line-0)',
+            borderRadius: 999,
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)',
+            zIndex: 2,
+          }}>
+            {APP_SHOTS.map((s, i) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setIdx(i); }}
+                aria-label={`Go to ${s.label}`}
+                style={{
+                  width: i === idx ? 18 : 6, height: 6, borderRadius: 999,
+                  background: i === idx ? 'var(--signal)' : 'var(--line-1)',
+                  border: 'none', cursor: 'pointer', padding: 0,
+                  transition: 'width 0.22s ease, background 0.12s ease',
+                }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* caption row below */}
+        <div style={{ marginTop: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 16, flexWrap: 'wrap' }}>
+          {indicator}
+          <span className="mono-tiny" style={{ color: 'var(--site-fg-3)' }}>
+            <span className="shots-hint-desktop">click to enlarge · ← → to switch</span>
+            <span className="shots-hint-touch" style={{ display: 'none' }}>tap to enlarge · swipe to switch</span>
+          </span>
+        </div>
+      </div>
+
+      {/* fullscreen lightbox */}
+      {fs && (
+        <FullscreenShot
+          shot={shot}
+          idx={idx}
+          total={total}
+          originRect={originRect}
+          onClose={() => setFs(false)}
+          onPrev={prev}
+          onNext={next}
+        />
+      )}
+    </>
+  );
+}
+
+function FullscreenShot({ shot, idx, total, originRect, onClose, onPrev, onNext }) {
+  // phase: 'entering' → 'open' → 'exiting'
+  const [phase, setPhase] = React.useState('entering');
+  const imgRef = React.useRef(null);
+  const [transformFromOrigin, setTransformFromOrigin] = React.useState(null);
+
+  // compute the transform that places the final-size image *over* the inline card
+  const computeOriginTransform = React.useCallback(() => {
+    if (!originRect || !imgRef.current) return null;
+    const r = imgRef.current.getBoundingClientRect();
+    if (r.width === 0 || r.height === 0) return null;
+    const tx = (originRect.left + originRect.width / 2) - (r.left + r.width / 2);
+    const ty = (originRect.top + originRect.height / 2) - (r.top + r.height / 2);
+    const sx = originRect.width / r.width;
+    const sy = originRect.height / r.height;
+    const s = Math.min(sx, sy); // uniform — image uses object-fit: contain
+    return `translate(${tx}px, ${ty}px) scale(${s})`;
+  }, [originRect]);
+
+  // entrance: set the "from" transform synchronously, then on next frame clear it
+  React.useLayoutEffect(() => {
+    const fromT = computeOriginTransform();
+    if (fromT) setTransformFromOrigin(fromT);
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setPhase('open'));
+    });
+    return () => cancelAnimationFrame(id);
+  }, [computeOriginTransform]);
+
+  const beginClose = React.useCallback(() => {
+    // recompute origin transform (window may have scrolled / resized)
+    const fromT = computeOriginTransform();
+    if (fromT) setTransformFromOrigin(fromT);
+    setPhase('exiting');
+    window.setTimeout(onClose, 320);
+  }, [computeOriginTransform, onClose]);
+
+  // keyboard
+  React.useEffect(() => {
+    function onKey(e) {
+      if (e.key === 'Escape')         { e.preventDefault(); beginClose(); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); onNext(); }
+      else if (e.key === 'ArrowLeft')  { e.preventDefault(); onPrev(); }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [beginClose, onNext, onPrev]);
+
+  // lock body scroll
+  React.useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
+  // Touch swipe inside the lightbox
+  const touchRef = React.useRef({ startX: 0, startY: 0, axis: null });
+  const onTouchStart = React.useCallback((e) => {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    touchRef.current = { startX: t.clientX, startY: t.clientY, axis: null };
+  }, []);
+  const onTouchMove = React.useCallback((e) => {
+    const s = touchRef.current;
+    if (s.axis || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    const dx = t.clientX - s.startX;
+    const dy = t.clientY - s.startY;
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) s.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+  }, []);
+  const onTouchEnd = React.useCallback((e) => {
+    const s = touchRef.current;
+    const t = (e.changedTouches && e.changedTouches[0]) || null;
+    if (!t) return;
+    const dx = t.clientX - s.startX;
+    const dy = t.clientY - s.startY;
+    if (s.axis === 'x' && Math.abs(dx) > 40) {
+      if (dx < 0) onNext(); else onPrev();
+    } else if (s.axis === 'y' && dy > 80) {
+      // swipe-down dismisses
+      beginClose();
+    }
+  }, [beginClose, onNext, onPrev]);
+
+  const isOpen = phase === 'open';
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${shot.label} screenshot fullscreen`}
+      className="shots-fs"
+      onClick={beginClose}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: 'color-mix(in oklch, var(--bg-0) 92%, black)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '48px 72px',
+        cursor: 'zoom-out',
+        opacity: isOpen ? 1 : 0,
+        transition: 'opacity 0.28s ease',
+        willChange: 'opacity',
+      }}>
+      {/* top chrome — fades in slightly delayed */}
+      <div
+        className="shots-fs-chrome"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: 'absolute', top: 20, left: 24, right: 24,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase',
+          color: 'var(--fg-2)',
+          opacity: isOpen ? 1 : 0,
+          transform: isOpen ? 'translateY(0)' : 'translateY(-6px)',
+          transition: 'opacity 0.25s ease 0.12s, transform 0.25s ease 0.12s',
+        }}>
+        <span>
+          <span style={{ color: 'var(--fg-0)' }}>{String(idx + 1).padStart(2, '0')}</span>
+          <span style={{ opacity: 0.5 }}> / {String(total).padStart(2, '0')}</span>
+          <span style={{ margin: '0 10px', opacity: 0.5 }}>·</span>
+          <span style={{ color: 'var(--signal)' }}>{shot.label}</span>
+        </span>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); beginClose(); }}
+          aria-label="Close fullscreen"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '6px 12px',
+            background: 'var(--bg-2)', color: 'var(--fg-1)',
+            border: '1px solid var(--line-0)', borderRadius: 4,
+            fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase',
+            cursor: 'pointer',
+          }}>
+          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+            <path d="M2 2 L8 8 M8 2 L2 8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          </svg>
+          Close · Esc
+        </button>
+      </div>
+
+      {/* image — animated zoom-from-origin */}
+      <img
+        ref={imgRef}
+        src={shot.src}
+        alt={`2ndEars — ${shot.label} tab (fullscreen)`}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxWidth: '100%', maxHeight: '100%',
+          objectFit: 'contain',
+          borderRadius: 8,
+          border: '1px solid var(--line-0)',
+          boxShadow: '0 40px 100px -20px rgba(0,0,0,.7)',
+          cursor: 'default',
+          transformOrigin: 'center center',
+          transform: isOpen ? 'none' : (transformFromOrigin || 'scale(0.92)'),
+          transition: 'transform 0.42s cubic-bezier(0.22, 1, 0.36, 1)',
+          willChange: 'transform',
+        }}
+        draggable={false}
+      />
+
+      {/* arrows — fade in */}
+      <div style={{
+        opacity: isOpen ? 1 : 0,
+        transition: 'opacity 0.25s ease 0.12s',
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+      }}>
+        <div style={{ pointerEvents: 'auto' }}>
+          <ArrowButton
+            dir="left"
+            ariaLabel="Previous screenshot"
+            onClick={onPrev}
+            className="shots-fs-arrow left"
+            style={{ position: 'absolute', left: 24, top: '50%', transform: 'translateY(-50%)', width: 48, height: 48 }}
+          />
+          <ArrowButton
+            dir="right"
+            ariaLabel="Next screenshot"
+            onClick={onNext}
+            className="shots-fs-arrow right"
+            style={{ position: 'absolute', right: 24, top: '50%', transform: 'translateY(-50%)', width: 48, height: 48 }}
+          />
+        </div>
+      </div>
+
+      {/* footer caption — fades in */}
+      <div
+        className="shots-fs-caption"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: 'absolute', bottom: 22, left: '50%',
+          fontSize: 13, color: 'var(--fg-1)', maxWidth: 640, textAlign: 'center',
+          letterSpacing: '-0.005em',
+          opacity: isOpen ? 1 : 0,
+          transform: isOpen ? 'translate(-50%, 0)' : 'translate(-50%, 6px)',
+          transition: 'opacity 0.25s ease 0.14s, transform 0.25s ease 0.14s',
+        }}>
+        {shot.caption}
+      </div>
+    </div>
+  );
+}
+
+// ─── Original synthetic mock kept for reference / fallback ─────────────────
+function DesktopAppMockSynthetic({ height = 540 }) {
   return (
     <div style={{
       width: '100%',

@@ -301,19 +301,45 @@
     align-items: center !important;
   }
 
-  /* ─── Desktop-app screenshot: horizontal-scroll snapshot ──────────── */
+  /* ─── Desktop-app screenshot: image carousel scales to viewport ──── */
   .app-mock-frame {
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    margin: 0 -16px;
-    padding: 0 16px 8px;
-    /* Hint at scroll affordance with a soft right fade */
-    -webkit-mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
-            mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+    margin: 0;
+    padding: 0;
   }
   .app-mock-frame > * {
-    min-width: 940px;
+    min-width: 0;
+  }
+  /* Inline arrows shrink on mobile so they don't crowd the image */
+  .app-shots .shots-arrow {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  /* Hint copy below the image: swap "click + keys" for "tap + swipe" */
+  .app-shots .shots-hint-desktop { display: none !important; }
+  .app-shots .shots-hint-touch { display: inline !important; }
+  /* Fullscreen lightbox: tighter padding so the image stays large on mobile */
+  [role="dialog"].shots-fs {
+    padding: 56px 12px 64px !important;
+  }
+  [role="dialog"].shots-fs .shots-fs-chrome {
+    left: 12px !important;
+    right: 12px !important;
+    top: 14px !important;
+  }
+  [role="dialog"].shots-fs .shots-fs-arrow {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  [role="dialog"].shots-fs .shots-fs-arrow.left {
+    left: 8px !important;
+  }
+  [role="dialog"].shots-fs .shots-fs-arrow.right {
+    right: 8px !important;
+  }
+  [role="dialog"].shots-fs .shots-fs-caption {
+    bottom: 14px !important;
+    font-size: 11.5px !important;
+    padding: 0 16px !important;
   }
 
   /* Signal-flow strip — stack the steps */
@@ -332,7 +358,6 @@
   .site [style*="grid-template-columns: 180px"] > .mono-tiny:last-child {
     display: none;
   }
-
   /* FOR PROS metric grid — keep the 3-up layout on mobile, just shrink the cells. */
   .site .pro-metrics {
     grid-template-columns: repeat(3, 1fr) !important;
@@ -623,205 +648,4 @@
   .dl-side-row { grid-template-columns: 1fr; }
   .os-switch__btn { padding: 7px 10px; font-size: 10.5px; }
   .dl-modal-platform { flex-direction: column; align-items: flex-start; gap: 8px; }
-}
-
-/* ============================================================
-   Screenshot carousel + lightbox
-   ============================================================ */
-
-/* ─── Carousel card ─────────────────────────────────────────── */
-.screenshot-card {
-  position: relative;
-  width: 100%;
-  overflow: hidden;
-  border-radius: 8px;
-  border: 1px solid var(--site-line);
-  cursor: zoom-in;
-  background: var(--site-card);
-  touch-action: pan-y;
-}
-
-/* ─── Sliding strip ─────────────────────────────────────────── */
-.screenshot-strip {
-  position: absolute;
-  top: 0; left: 0;
-  height: 100%;
-  display: flex;
-  transition: transform 0.5s ease;
-}
-
-.screenshot-strip-img {
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  user-select: none;
-  -webkit-user-drag: none;
-  flex-shrink: 0;
-}
-
-/* ─── Arrow buttons ─────────────────────────────────────────── */
-.screenshot-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 40px; height: 40px;
-  display: flex; align-items: center; justify-content: center;
-  background: color-mix(in oklch, var(--site-bg) 85%, transparent);
-  border: 1px solid var(--site-line);
-  border-radius: 50%;
-  color: var(--site-fg);
-  cursor: pointer;
-  z-index: 2;
-  opacity: 0.7;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  transition: opacity .15s, background .12s;
-}
-.screenshot-arrow:hover { opacity: 1; background: var(--site-bg); }
-.screenshot-arrow--prev { left: 14px; }
-.screenshot-arrow--next { right: 14px; }
-
-/* ─── Hint text ─────────────────────────────────────────────── */
-.screenshot-hint {
-  position: absolute;
-  bottom: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: color-mix(in oklch, var(--site-fg) 55%, transparent);
-  background: color-mix(in oklch, var(--site-bg) 75%, transparent);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  padding: 4px 10px;
-  border-radius: 4px;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity .2s;
-}
-.screenshot-card:hover .screenshot-hint { opacity: 1; }
-.screenshot-hint--touch { display: none; }
-
-/* ─── Dot indicators ────────────────────────────────────────── */
-.screenshot-dots {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.screenshot-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--site-line-1);
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  transition: background .15s, transform .15s;
-}
-.screenshot-dot.is-active {
-  background: var(--site-fg);
-  transform: scale(1.25);
-}
-.screenshot-dot:hover:not(.is-active) { background: var(--site-fg-2); }
-
-/* ─── Lightbox backdrop ─────────────────────────────────────── */
-.screenshot-lb-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  background: color-mix(in oklch, oklch(0.06 0.005 60) 88%, transparent);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  animation: lbFadeIn .2s ease-out;
-}
-.screenshot-lb-backdrop.is-closing {
-  animation: lbFadeOut .26s ease-in forwards;
-}
-
-@keyframes lbFadeIn  { from { opacity: 0; } to { opacity: 1; } }
-@keyframes lbFadeOut { from { opacity: 1; } to { opacity: 0; } }
-
-/* ─── Lightbox inner container ──────────────────────────────── */
-.screenshot-lb-inner {
-  position: relative;
-  max-width: min(1200px, 95vw);
-  width: 100%;
-  animation: lbZoomIn .25s ease-out;
-}
-.screenshot-lb-inner.is-closing {
-  animation: lbZoomOut .26s ease-in forwards;
-}
-
-@keyframes lbZoomIn  { from { opacity: 0; transform: scale(0.91); } to { opacity: 1; transform: scale(1); } }
-@keyframes lbZoomOut { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.91); } }
-
-.screenshot-lb-img {
-  width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 6px;
-  border: 1px solid var(--site-line);
-  box-shadow: 0 32px 80px -20px rgba(0,0,0,0.7);
-}
-
-/* ─── Lightbox close button ─────────────────────────────────── */
-.screenshot-lb-close {
-  position: fixed;
-  top: 16px; right: 16px;
-  width: 36px; height: 36px;
-  display: flex; align-items: center; justify-content: center;
-  background: color-mix(in oklch, var(--site-bg) 85%, transparent);
-  border: 1px solid var(--site-line);
-  border-radius: 50%;
-  color: var(--site-fg);
-  cursor: pointer;
-  z-index: 3;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  transition: background .12s;
-}
-.screenshot-lb-close:hover { background: var(--site-bg); }
-
-/* ─── Lightbox arrows ───────────────────────────────────────── */
-.screenshot-lb-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 44px; height: 44px;
-  opacity: 0.85;
-}
-.screenshot-lb-arrow.screenshot-arrow--prev { left: -60px; }
-.screenshot-lb-arrow.screenshot-arrow--next { right: -60px; }
-
-/* ─── Lightbox caption ──────────────────────────────────────── */
-.screenshot-lb-caption {
-  text-align: center;
-  margin-top: 14px;
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--site-fg-3);
-}
-
-/* ─── Mobile ────────────────────────────────────────────────── */
-@media (max-width: 768px) {
-  .screenshot-arrow { width: 32px; height: 32px; }
-  .screenshot-arrow--prev { left: 8px; }
-  .screenshot-arrow--next { right: 8px; }
-  .screenshot-hint--desktop { display: none; }
-  .screenshot-hint--touch { display: block; }
-
-  .screenshot-lb-backdrop { padding: 12px; align-items: center; }
-  .screenshot-lb-arrow { width: 36px; height: 36px; }
-  .screenshot-lb-arrow.screenshot-arrow--prev { left: 6px; }
-  .screenshot-lb-arrow.screenshot-arrow--next { right: 6px; }
 }
