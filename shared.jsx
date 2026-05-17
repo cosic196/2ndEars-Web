@@ -115,7 +115,7 @@ const HOW_IT_WORKS = [
 ];
 
 const FEATURES = [
-  ['ANALYSIS', 'LUFS, peak, crest factor, stereo width and transient density — measured per track. The full picture the AI assistant draws on, even when it never reaches the screen.'],
+  ['ANALYSIS', 'LUFS, peak, crest factor, stereo width and transient density — measured per track. The full picture the AI assistant draws on.'],
   ['SPECTRAL BALANCE', '6-band energy breakdown for every track, so you can see exactly where each one sits in the spectrum.'],
   ['MASKING DETECTION', 'Finds common masking patterns — low-end conflicts, low-mid buildup, crowded mids, harsh highs, buried leads — names the tracks that collide, and suggests concrete EQ, compression, level and pan fixes for each.'],
   ['ROUTING GRAPH', 'Sources → buses → master, rebuilt straight from the plugins. Click any node to audition it, or see how many LU each source adds to the master.'],
