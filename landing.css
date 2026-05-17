@@ -225,6 +225,12 @@
     var(--site-bg);
 }
 
+/* ─── Feature rows: equal-height on desktop, natural on mobile ──────── */
+.feature-rows { display: grid; grid-auto-rows: 88px; }
+@media (max-width: 768px) {
+  .feature-rows { display: block; }
+}
+
 /* ─── App-mock chrome (excluded from mobile collapse) ───────────────── */
 .app-mock-grid { display: grid; grid-template-columns: 1.4fr 1fr; }
 .app-mock-frame { width: 100%; }
