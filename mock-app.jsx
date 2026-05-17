@@ -415,8 +415,8 @@ function DesktopAppMock({ height = 540 }) {
           aria-label={`Open ${shot.label} screenshot fullscreen`}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFs(); }
-            else if (e.key === 'ArrowRight') { e.preventDefault(); next(); }
-            else if (e.key === 'ArrowLeft')  { e.preventDefault(); prev(); }
+            else if (!fs && e.key === 'ArrowRight') { e.preventDefault(); next(); }
+            else if (!fs && e.key === 'ArrowLeft')  { e.preventDefault(); prev(); }
           }}
           style={{
             width: '100%',
@@ -684,7 +684,7 @@ function FullscreenShot({ shot, idx, total, originRect, onClose, onPrev, onNext 
           <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
             <path d="M2 2 L8 8 M8 2 L2 8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
           </svg>
-          Close · Esc
+          Close
         </button>
       </div>
 
@@ -751,163 +751,6 @@ function FullscreenShot({ shot, idx, total, originRect, onClose, onPrev, onNext 
   );
 }
 
-// ─── Original synthetic mock kept for reference / fallback ─────────────────
-function DesktopAppMockSynthetic({ height = 540 }) {
-  return (
-    <div style={{
-      width: '100%',
-      borderRadius: 10,
-      overflow: 'hidden',
-      background: 'var(--bg-0)',
-      border: '1px solid var(--line-0)',
-      boxShadow: '0 32px 80px -24px rgba(0,0,0,.6), 0 0 0 1px oklch(0.22 0.006 60)',
-      fontFamily: 'var(--font-ui)',
-      color: 'var(--fg-0)',
-    }}>
-      {/* macOS-ish window chrome */}
-      <div style={{
-        height: 28, background: 'var(--bg-1)',
-        borderBottom: '1px solid var(--line-0)',
-        display: 'flex', alignItems: 'center', gap: 8, padding: '0 12px'
-      }}>
-        <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#ff5f57' }} />
-        <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#febc2e' }} />
-        <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#28c840' }} />
-        <span style={{ flex: 1, textAlign: 'center', fontSize: 11.5, color: 'var(--fg-2)' }}>2ndEars</span>
-      </div>
-      {/* App top bar */}
-      <div style={{
-        height: 44, background: 'var(--bg-1)',
-        borderBottom: '1px solid var(--line-0)',
-        display: 'flex', alignItems: 'center', gap: 14, padding: '0 16px'
-      }}>
-        <span className="logo-mark" style={{ width: 18, height: 18, color: 'var(--fg-0)' }} />
-        <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--fg-0)' }}>2ndEars</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 8, padding: '4px 10px',
-          borderRadius: 999, background: 'color-mix(in oklch, var(--signal) 10%, transparent)',
-          border: '1px solid color-mix(in oklch, var(--signal) 28%, transparent)' }}>
-          <span className="dot-signal" />
-          <span style={{ fontSize: 11, color: 'var(--signal)' }}>Listening</span>
-        </div>
-        <div style={{ display: 'flex', gap: 18, marginLeft: 16 }}>
-          <span className="mono-l">SR <span style={{ color: 'var(--fg-1)' }}>48.0k</span></span>
-          <span className="mono-l">ANALYZERS <span style={{ color: 'var(--fg-1)' }}>2</span></span>
-        </div>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-          <button style={{
-            padding: '5px 10px', fontSize: 11.5, background: 'var(--bg-2)',
-            color: 'var(--fg-1)', border: '1px solid var(--line-0)', borderRadius: 4,
-            display: 'flex', alignItems: 'center', gap: 6
-          }}>
-            <svg width="9" height="9" viewBox="0 0 10 10"><path d="M5.5 1v9 M1 5.5h9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
-            New Session
-          </button>
-        </div>
-      </div>
-      {/* Main grid: tabs+routing | chat. Class-based grid so mobile rules can
-          exclude this from the universal collapse-to-1col override. */}
-      <div className="app-mock-grid" style={{ height: height - 28 - 44 - 24 }}>
-        <div style={{ borderRight: '1px solid var(--line-0)', display: 'flex', flexDirection: 'column' }}>
-          {/* tab bar */}
-          <div style={{ height: 36, borderBottom: '1px solid var(--line-0)', display: 'flex', alignItems: 'center', padding: '0 14px', gap: 18 }}>
-            {['Routing', 'Analysis', 'Masking'].map((t, i) => (
-              <span key={t} style={{
-                fontSize: 12, fontWeight: 500,
-                color: i === 0 ? 'var(--fg-0)' : 'var(--fg-2)',
-                borderBottom: i === 0 ? '2px solid var(--signal)' : '2px solid transparent',
-                padding: '8px 0'
-              }}>{t}</span>
-            ))}
-          </div>
-          <div style={{ flex: 1, padding: 16 }}>
-            <RoutingGraphIllustration height={height - 28 - 44 - 24 - 36 - 32} />
-          </div>
-        </div>
-        <ChatPanelMock />
-      </div>
-      {/* status bar */}
-      <div style={{
-        height: 24, background: 'var(--bg-1)', borderTop: '1px solid var(--line-0)',
-        display: 'flex', alignItems: 'center', padding: '0 14px', gap: 10
-      }}>
-        <span className="dot-signal" />
-        <span className="mono-tiny" style={{ color: 'var(--fg-1)' }}>Playing <strong style={{ color: 'var(--fg-0)' }}>Drum Bus</strong> · −12.4 LUFS · −1.0 dBFS</span>
-        <span style={{ marginLeft: 'auto' }} className="mono-tiny">⏎ to send · ⇧⏎ new line</span>
-      </div>
-    </div>
-  );
-}
-
-function ChatPanelMock() {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', background: 'var(--bg-1)' }}>
-      <div style={{
-        height: 36, padding: '0 14px',
-        display: 'flex', alignItems: 'center', gap: 10,
-        borderBottom: '1px solid var(--line-0)'
-      }}>
-        <div style={{
-          width: 18, height: 18, borderRadius: '50%',
-          background: 'color-mix(in oklch, var(--ai) 22%, transparent)',
-          border: '1px solid color-mix(in oklch, var(--ai) 40%, transparent)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--ai)', animation: 'aiPulse 1.6s ease-in-out infinite' }} />
-        </div>
-        <span style={{ fontSize: 12, fontWeight: 600 }}>Assistant</span>
-        <span style={{ marginLeft: 'auto' }} className="mono-l">2/5 TURNS</span>
-      </div>
-      <div style={{ flex: 1, padding: '14px 14px 8px', display: 'flex', flexDirection: 'column', gap: 10, overflow: 'hidden' }}>
-        <div style={{
-          alignSelf: 'flex-start', maxWidth: '85%', fontSize: 11.5,
-          color: 'var(--fg-2)', fontFamily: 'var(--font-mono)', letterSpacing: '0.02em'
-        }}>Analysis complete: 9 tracks analyzed.</div>
-        <div style={{
-          alignSelf: 'flex-end', maxWidth: '85%',
-          background: 'var(--bg-3)', padding: '8px 12px',
-          borderRadius: 8, fontSize: 12.5, color: 'var(--fg-0)',
-        }}>What's the biggest issue with this mix?</div>
-        <div style={{
-          alignSelf: 'flex-start', maxWidth: '92%',
-          fontSize: 12.5, color: 'var(--fg-0)', lineHeight: 1.55,
-        }}>
-          <strong>Sub is hot.</strong> Kick (80–120 Hz) is masking Bass DI at −7 dB on the Drum Bus — that's your biggest issue.
-          <br /><br />
-          Try a <strong>1–2 dB cut</strong> at 90 Hz on the bass, sidechained to the kick. The Vocal Lead is also fighting Snare in the mid band — pull the snare down 1 dB or carve a 1 kHz dip on the snare bus<span style={{
-            display: 'inline-block', width: 6, height: 12, background: 'var(--ai)',
-            marginLeft: 3, verticalAlign: -2, animation: 'pulseOpacity 1s ease infinite'
-          }} />
-        </div>
-      </div>
-      {/* suggestion chips */}
-      <div style={{ padding: '0 14px 10px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        {['Is the low end balanced?', 'Which tracks are masking each other?', 'Is my mix muddy?'].map(t => (
-          <span key={t} style={{
-            padding: '4px 10px', borderRadius: 999,
-            background: 'var(--bg-2)', border: '1px solid var(--line-0)',
-            fontSize: 11, color: 'var(--fg-1)'
-          }}>{t}</span>
-        ))}
-      </div>
-      {/* input row */}
-      <div style={{
-        margin: '0 14px 14px', padding: '8px 12px',
-        background: 'var(--bg-2)', border: '1px solid var(--line-0)',
-        borderRadius: 6, display: 'flex', alignItems: 'center', gap: 10
-      }}>
-        <span style={{ flex: 1, fontSize: 12, color: 'var(--fg-3)' }}>Ask about balance, EQ, dynamics…</span>
-        <button style={{
-          width: 22, height: 22, borderRadius: 4,
-          background: 'var(--signal)',
-          border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: 'oklch(0.18 0.008 60)'
-        }}>
-          <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1.5 5h7m-3-3 3 3-3 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" fill="none" /></svg>
-        </button>
-      </div>
-    </div>
-  );
-}
 
 // ─── Video placeholder ──────────────────────────────────────────────────────
 function VideoPlaceholder({ label = 'Demo video', height = 480 }) {
@@ -960,6 +803,6 @@ function SpectrumBars({ bars = [0.6, 0.85, 0.55, 0.3, 0.5, 0.7, 0.9, 0.45, 0.25,
 Object.assign(window, {
   MeterCells, LetterBadge, PluginWindow,
   LeftEarMock, RightEarMock,
-  RoutingGraphIllustration, DesktopAppMock, ChatPanelMock,
+  RoutingGraphIllustration, DesktopAppMock,
   VideoPlaceholder, SpectrumBars,
 });
