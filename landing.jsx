@@ -70,8 +70,7 @@ function LandingB() {
       <section className="section-narrow">
         <div className="container">
           <div className="row-between" style={{ marginBottom: 18 }}>
-            <span className="mono-l">FIG · 1 · DESKTOP APP, ROUTING TAB</span>
-            {/* <span className="mono-tiny" style={{ color: 'var(--site-fg-3)' }}>placeholder · final screenshot t.b.d.</span> */}
+            <span className="mono-l">FIG · 1 · 2ndEars UI</span>
           </div>
           <div className="app-mock-frame">
             <DesktopAppMock height={540} />
@@ -135,13 +134,13 @@ function LandingB() {
       <section className="section" id="features" style={{ background: 'var(--site-bg-2)' }}>
         <div className="container">
           <SectionLabel n="05" title="Features" subtitle="Four engines · one chat" />
-          <div style={{ borderTop: '1px solid var(--site-line)' }}>
+          <div className="feature-rows" style={{ borderTop: '1px solid var(--site-line)' }}>
             {FEATURES.map(([label, desc], i) => (
               <div key={label} style={{
                 display: 'grid', gridTemplateColumns: '180px 1fr auto',
                 padding: '20px 0', gap: 28,
                 borderBottom: '1px solid var(--site-line)',
-                alignItems: 'baseline',
+                alignItems: 'center',
               }}>
                 <span className="mono-l" style={{ color: 'var(--site-fg)' }}>{label}</span>
                 <span style={{ fontSize: 15, color: 'var(--site-fg-1)', lineHeight: 1.5 }}>{desc}</span>

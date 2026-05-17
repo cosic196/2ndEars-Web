@@ -285,163 +285,472 @@ function RoutingGraphIllustration({ active = 'Master', height = 320 }) {
   );
 }
 
-// ─── Full desktop app mock (a faked window) ─────────────────────────────────
-function DesktopAppMock({ height = 540 }) {
+// ─── Full desktop app figure (real screenshots, tabbed) ────────────────────
+const APP_SHOTS = [
+  { id: 'routing',  label: 'Routing',  caption: 'Sources → Buses → Master. Click a node to audition that stem.', src: 'assets/screenshot-routing.png' },
+  { id: 'analysis', label: 'Analysis', caption: 'Per-track spectrum, LUFS & peak.',     src: 'assets/screenshot-analysis.png' },
+  { id: 'masking',  label: 'Masking',  caption: 'Conflict patterns with computed fixes.', src: 'assets/screenshot-masking.png' },
+];
+
+function Chevron({ dir = 'right', size = 14 }) {
+  const d = dir === 'right' ? 'M3 1 L7 5 L3 9' : 'M7 1 L3 5 L7 9';
   return (
-    <div style={{
-      width: '100%',
-      borderRadius: 10,
-      overflow: 'hidden',
-      background: 'var(--bg-0)',
-      border: '1px solid var(--line-0)',
-      boxShadow: '0 32px 80px -24px rgba(0,0,0,.6), 0 0 0 1px oklch(0.22 0.006 60)',
-      fontFamily: 'var(--font-ui)',
-      color: 'var(--fg-0)',
-    }}>
-      {/* macOS-ish window chrome */}
-      <div style={{
-        height: 28, background: 'var(--bg-1)',
-        borderBottom: '1px solid var(--line-0)',
-        display: 'flex', alignItems: 'center', gap: 8, padding: '0 12px'
+    <svg width={size} height={size} viewBox="0 0 10 10" aria-hidden="true">
+      <path d={d} stroke="currentColor" strokeWidth="1.3" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ArrowButton({ dir, onClick, ariaLabel, style, className }) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => { e.stopPropagation(); onClick(); }}
+      aria-label={ariaLabel}
+      className={`shots-arrow${className ? ' ' + className : ''}`}
+      style={{
+        width: 40, height: 40, borderRadius: 999,
+        background: 'color-mix(in oklch, var(--bg-0) 78%, transparent)',
+        border: '1px solid var(--line-1)',
+        color: 'var(--fg-0)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        cursor: 'pointer',
+        backdropFilter: 'blur(4px)',
+        WebkitBackdropFilter: 'blur(4px)',
+        transition: 'background 0.12s ease, border-color 0.12s ease',
+        ...style,
       }}>
-        <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#ff5f57' }} />
-        <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#febc2e' }} />
-        <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#28c840' }} />
-        <span style={{ flex: 1, textAlign: 'center', fontSize: 11.5, color: 'var(--fg-2)' }}>2ndEars</span>
-      </div>
-      {/* App top bar */}
-      <div style={{
-        height: 44, background: 'var(--bg-1)',
-        borderBottom: '1px solid var(--line-0)',
-        display: 'flex', alignItems: 'center', gap: 14, padding: '0 16px'
-      }}>
-        <span className="logo-mark" style={{ width: 18, height: 18, color: 'var(--fg-0)' }} />
-        <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--fg-0)' }}>2ndEars</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 8, padding: '4px 10px',
-          borderRadius: 999, background: 'color-mix(in oklch, var(--signal) 10%, transparent)',
-          border: '1px solid color-mix(in oklch, var(--signal) 28%, transparent)' }}>
-          <span className="dot-signal" />
-          <span style={{ fontSize: 11, color: 'var(--signal)' }}>Listening</span>
-        </div>
-        <div style={{ display: 'flex', gap: 18, marginLeft: 16 }}>
-          <span className="mono-l">SR <span style={{ color: 'var(--fg-1)' }}>48.0k</span></span>
-          <span className="mono-l">ANALYZERS <span style={{ color: 'var(--fg-1)' }}>2</span></span>
-        </div>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-          <button style={{
-            padding: '5px 10px', fontSize: 11.5, background: 'var(--bg-2)',
-            color: 'var(--fg-1)', border: '1px solid var(--line-0)', borderRadius: 4,
-            display: 'flex', alignItems: 'center', gap: 6
+      <Chevron dir={dir} size={14} />
+    </button>
+  );
+}
+
+function DesktopAppMock({ height = 540 }) {
+  const [idx, setIdx] = React.useState(0);
+  const [fs, setFs] = React.useState(false);
+  // Aspect ratio auto-detected from the first loaded screenshot. Fallback
+  // matches the originals (1442 × 722) until the image's onLoad fires.
+  const [aspectRatio, setAspectRatio] = React.useState('1442 / 722');
+  const cardRef = React.useRef(null);
+  const [originRect, setOriginRect] = React.useState(null);
+  const shot = APP_SHOTS[idx];
+  const total = APP_SHOTS.length;
+
+  const next = React.useCallback(() => setIdx(i => (i + 1) % total), [total]);
+  const prev = React.useCallback(() => setIdx(i => (i - 1 + total) % total), [total]);
+
+  // capture inline-image rect so lightbox can zoom OUT of it on close
+  const openFs = React.useCallback(() => {
+    if (cardRef.current) {
+      const r = cardRef.current.getBoundingClientRect();
+      setOriginRect({ left: r.left, top: r.top, width: r.width, height: r.height });
+    }
+    setFs(true);
+  }, []);
+
+  // Touch swipe — horizontal drag past a threshold cycles screenshots
+  const touchRef = React.useRef({ startX: 0, startY: 0, active: false, decided: false });
+  const onTouchStart = React.useCallback((e) => {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    touchRef.current = { startX: t.clientX, startY: t.clientY, active: true, decided: false, axis: null };
+  }, []);
+  const onTouchMove = React.useCallback((e) => {
+    const s = touchRef.current;
+    if (!s.active || e.touches.length !== 1) return;
+    if (s.axis) return; // already decided
+    const t = e.touches[0];
+    const dx = t.clientX - s.startX;
+    const dy = t.clientY - s.startY;
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+      s.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+    }
+  }, []);
+  const onTouchEnd = React.useCallback((e) => {
+    const s = touchRef.current;
+    if (!s.active) return;
+    const t = (e.changedTouches && e.changedTouches[0]) || null;
+    const dx = t ? t.clientX - s.startX : 0;
+    s.active = false;
+    if (s.axis === 'x' && Math.abs(dx) > 40) {
+      // swipe — also cancel the click-to-fullscreen that would fire next
+      s.swiped = true;
+      if (dx < 0) next(); else prev();
+    } else {
+      s.swiped = false;
+    }
+  }, [next, prev]);
+  const onCardClick = React.useCallback(() => {
+    // Skip opening fullscreen if this click was really a swipe-end
+    if (touchRef.current.swiped) { touchRef.current.swiped = false; return; }
+    openFs();
+  }, [openFs]);
+
+  const indicator = (
+    <span className="mono-tiny" style={{ color: 'var(--fg-2)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+      <span style={{ color: 'var(--fg-0)' }}>{String(idx + 1).padStart(2, '0')}</span>
+      <span style={{ opacity: 0.5 }}> / {String(total).padStart(2, '0')}</span>
+      <span style={{ margin: '0 8px', opacity: 0.5 }}>·</span>
+      <span style={{ color: 'var(--signal)' }}>{shot.label}</span>
+      <span style={{ margin: '0 8px', opacity: 0.5 }}>·</span>
+      <span style={{ color: 'var(--fg-1)', textTransform: 'none', letterSpacing: '0.02em' }}>{shot.caption}</span>
+    </span>
+  );
+
+  return (
+    <>
+      <div
+        className="app-shots"
+        style={{ width: '100%', position: 'relative' }}
+      >
+        {/* image card — click to open fullscreen */}
+        <div
+          ref={cardRef}
+          onClick={onCardClick}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+          role="button"
+          tabIndex={0}
+          aria-label={`Open ${shot.label} screenshot fullscreen`}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFs(); }
+            else if (!fs && e.key === 'ArrowRight') { e.preventDefault(); next(); }
+            else if (!fs && e.key === 'ArrowLeft')  { e.preventDefault(); prev(); }
+          }}
+          style={{
+            width: '100%',
+            borderRadius: 10,
+            overflow: 'hidden',
+            background: 'var(--bg-0)',
+            border: '1px solid var(--line-0)',
+            boxShadow: '0 32px 80px -24px rgba(0,0,0,.6), 0 0 0 1px oklch(0.22 0.006 60)',
+            aspectRatio,
+            position: 'relative',
+            cursor: 'zoom-in',
+            touchAction: 'pan-y', // allow vertical scroll, capture horizontal
+            WebkitTapHighlightColor: 'transparent',
+            userSelect: 'none',
           }}>
-            <svg width="9" height="9" viewBox="0 0 10 10"><path d="M5.5 1v9 M1 5.5h9" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" /></svg>
-            New Session
-          </button>
-        </div>
-      </div>
-      {/* Main grid: tabs+routing | chat. Class-based grid so mobile rules can
-          exclude this from the universal collapse-to-1col override. */}
-      <div className="app-mock-grid" style={{ height: height - 28 - 44 - 24 }}>
-        <div style={{ borderRight: '1px solid var(--line-0)', display: 'flex', flexDirection: 'column' }}>
-          {/* tab bar */}
-          <div style={{ height: 36, borderBottom: '1px solid var(--line-0)', display: 'flex', alignItems: 'center', padding: '0 14px', gap: 18 }}>
-            {['Routing', 'Analysis', 'Masking'].map((t, i) => (
-              <span key={t} style={{
-                fontSize: 12, fontWeight: 500,
-                color: i === 0 ? 'var(--fg-0)' : 'var(--fg-2)',
-                borderBottom: i === 0 ? '2px solid var(--signal)' : '2px solid transparent',
-                padding: '8px 0'
-              }}>{t}</span>
+          {/* sliding strip */}
+          <div
+            className="shots-strip"
+            style={{
+              position: 'absolute', inset: 0,
+              display: 'flex',
+              width: `${total * 100}%`,
+              transform: `translate3d(-${idx * (100 / total)}%, 0, 0)`,
+              transition: 'transform 0.5s cubic-bezier(0.65, 0, 0.2, 1)',
+              willChange: 'transform',
+            }}>
+            {APP_SHOTS.map((s, i) => (
+              <div
+                key={s.id}
+                style={{
+                  width: `${100 / total}%`,
+                  height: '100%',
+                  flexShrink: 0,
+                  position: 'relative',
+                }}>
+                <img
+                  src={s.src}
+                  alt={`2ndEars — ${s.label} tab`}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                  onLoad={i === 0 ? (e) => {
+                    const im = e.currentTarget;
+                    if (im.naturalWidth && im.naturalHeight) {
+                      setAspectRatio(`${im.naturalWidth} / ${im.naturalHeight}`);
+                    }
+                  } : undefined}
+                  style={{
+                    width: '100%', height: '100%',
+                    display: 'block', objectFit: 'cover',
+                    // hide the active image while the lightbox is open (it's
+                    // visually replaced by the zooming lightbox image — this
+                    // makes the FLIP-style zoom-out feel like the same image)
+                    visibility: (fs && i === idx) ? 'hidden' : 'visible',
+                  }}
+                  draggable={false}
+                />
+              </div>
             ))}
           </div>
-          <div style={{ flex: 1, padding: 16 }}>
-            <RoutingGraphIllustration height={height - 28 - 44 - 24 - 36 - 32} />
+
+          {/* arrows positioned over the image */}
+          <ArrowButton
+            dir="left"
+            ariaLabel="Previous screenshot"
+            onClick={prev}
+            style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', zIndex: 2 }}
+          />
+          <ArrowButton
+            dir="right"
+            ariaLabel="Next screenshot"
+            onClick={next}
+            style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', zIndex: 2 }}
+          />
+
+          {/* dot indicators bottom-center */}
+          <div style={{
+            position: 'absolute', bottom: 14, left: '50%', transform: 'translateX(-50%)',
+            display: 'flex', gap: 6, padding: '6px 10px',
+            background: 'color-mix(in oklch, var(--bg-0) 78%, transparent)',
+            border: '1px solid var(--line-0)',
+            borderRadius: 999,
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)',
+            zIndex: 2,
+          }}>
+            {APP_SHOTS.map((s, i) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setIdx(i); }}
+                aria-label={`Go to ${s.label}`}
+                style={{
+                  width: i === idx ? 18 : 6, height: 6, borderRadius: 999,
+                  background: i === idx ? 'var(--signal)' : 'var(--line-1)',
+                  border: 'none', cursor: 'pointer', padding: 0,
+                  transition: 'width 0.22s ease, background 0.12s ease',
+                }}
+              />
+            ))}
           </div>
         </div>
-        <ChatPanelMock />
+
+        {/* caption row below */}
+        <div style={{ marginTop: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 16, flexWrap: 'wrap' }}>
+          {indicator}
+          <span className="mono-tiny" style={{ color: 'var(--site-fg-3)' }}>
+            <span className="shots-hint-desktop">click to enlarge · ← → to switch</span>
+            <span className="shots-hint-touch" style={{ display: 'none' }}>tap to enlarge · swipe to switch</span>
+          </span>
+        </div>
       </div>
-      {/* status bar */}
-      <div style={{
-        height: 24, background: 'var(--bg-1)', borderTop: '1px solid var(--line-0)',
-        display: 'flex', alignItems: 'center', padding: '0 14px', gap: 10
+
+      {/* fullscreen lightbox */}
+      {fs && (
+        <FullscreenShot
+          shot={shot}
+          idx={idx}
+          total={total}
+          originRect={originRect}
+          onClose={() => setFs(false)}
+          onPrev={prev}
+          onNext={next}
+        />
+      )}
+    </>
+  );
+}
+
+function FullscreenShot({ shot, idx, total, originRect, onClose, onPrev, onNext }) {
+  // phase: 'entering' → 'open' → 'exiting'
+  const [phase, setPhase] = React.useState('entering');
+  const imgRef = React.useRef(null);
+  const [transformFromOrigin, setTransformFromOrigin] = React.useState(null);
+
+  // compute the transform that places the final-size image *over* the inline card
+  const computeOriginTransform = React.useCallback(() => {
+    if (!originRect || !imgRef.current) return null;
+    const r = imgRef.current.getBoundingClientRect();
+    if (r.width === 0 || r.height === 0) return null;
+    const tx = (originRect.left + originRect.width / 2) - (r.left + r.width / 2);
+    const ty = (originRect.top + originRect.height / 2) - (r.top + r.height / 2);
+    const sx = originRect.width / r.width;
+    const sy = originRect.height / r.height;
+    const s = Math.min(sx, sy); // uniform — image uses object-fit: contain
+    return `translate(${tx}px, ${ty}px) scale(${s})`;
+  }, [originRect]);
+
+  // entrance: set the "from" transform synchronously, then on next frame clear it
+  React.useLayoutEffect(() => {
+    const fromT = computeOriginTransform();
+    if (fromT) setTransformFromOrigin(fromT);
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setPhase('open'));
+    });
+    return () => cancelAnimationFrame(id);
+  }, [computeOriginTransform]);
+
+  const beginClose = React.useCallback(() => {
+    // recompute origin transform (window may have scrolled / resized)
+    const fromT = computeOriginTransform();
+    if (fromT) setTransformFromOrigin(fromT);
+    setPhase('exiting');
+    window.setTimeout(onClose, 320);
+  }, [computeOriginTransform, onClose]);
+
+  // keyboard
+  React.useEffect(() => {
+    function onKey(e) {
+      if (e.key === 'Escape')         { e.preventDefault(); beginClose(); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); onNext(); }
+      else if (e.key === 'ArrowLeft')  { e.preventDefault(); onPrev(); }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [beginClose, onNext, onPrev]);
+
+  // lock body scroll
+  React.useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, []);
+
+  // Touch swipe inside the lightbox
+  const touchRef = React.useRef({ startX: 0, startY: 0, axis: null });
+  const onTouchStart = React.useCallback((e) => {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    touchRef.current = { startX: t.clientX, startY: t.clientY, axis: null };
+  }, []);
+  const onTouchMove = React.useCallback((e) => {
+    const s = touchRef.current;
+    if (s.axis || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    const dx = t.clientX - s.startX;
+    const dy = t.clientY - s.startY;
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) s.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+  }, []);
+  const onTouchEnd = React.useCallback((e) => {
+    const s = touchRef.current;
+    const t = (e.changedTouches && e.changedTouches[0]) || null;
+    if (!t) return;
+    const dx = t.clientX - s.startX;
+    const dy = t.clientY - s.startY;
+    if (s.axis === 'x' && Math.abs(dx) > 40) {
+      if (dx < 0) onNext(); else onPrev();
+    } else if (s.axis === 'y' && dy > 80) {
+      // swipe-down dismisses
+      beginClose();
+    }
+  }, [beginClose, onNext, onPrev]);
+
+  const isOpen = phase === 'open';
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${shot.label} screenshot fullscreen`}
+      className="shots-fs"
+      onClick={beginClose}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: 'color-mix(in oklch, var(--bg-0) 92%, black)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: '48px 72px',
+        cursor: 'zoom-out',
+        opacity: isOpen ? 1 : 0,
+        transition: 'opacity 0.28s ease',
+        willChange: 'opacity',
       }}>
-        <span className="dot-signal" />
-        <span className="mono-tiny" style={{ color: 'var(--fg-1)' }}>Playing <strong style={{ color: 'var(--fg-0)' }}>Drum Bus</strong> · −12.4 LUFS · −1.0 dBFS</span>
-        <span style={{ marginLeft: 'auto' }} className="mono-tiny">⏎ to send · ⇧⏎ new line</span>
+      {/* top chrome — fades in slightly delayed */}
+      <div
+        className="shots-fs-chrome"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: 'absolute', top: 20, left: 24, right: 24,
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase',
+          color: 'var(--fg-2)',
+          opacity: isOpen ? 1 : 0,
+          transform: isOpen ? 'translateY(0)' : 'translateY(-6px)',
+          transition: 'opacity 0.25s ease 0.12s, transform 0.25s ease 0.12s',
+        }}>
+        <span>
+          <span style={{ color: 'var(--fg-0)' }}>{String(idx + 1).padStart(2, '0')}</span>
+          <span style={{ opacity: 0.5 }}> / {String(total).padStart(2, '0')}</span>
+          <span style={{ margin: '0 10px', opacity: 0.5 }}>·</span>
+          <span style={{ color: 'var(--signal)' }}>{shot.label}</span>
+        </span>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); beginClose(); }}
+          aria-label="Close fullscreen"
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '6px 12px',
+            background: 'var(--bg-2)', color: 'var(--fg-1)',
+            border: '1px solid var(--line-0)', borderRadius: 4,
+            fontFamily: 'var(--font-mono)', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase',
+            cursor: 'pointer',
+          }}>
+          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+            <path d="M2 2 L8 8 M8 2 L2 8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+          </svg>
+          Close
+        </button>
+      </div>
+
+      {/* image — animated zoom-from-origin */}
+      <img
+        ref={imgRef}
+        src={shot.src}
+        alt={`2ndEars — ${shot.label} tab (fullscreen)`}
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          maxWidth: '100%', maxHeight: '100%',
+          objectFit: 'contain',
+          borderRadius: 8,
+          border: '1px solid var(--line-0)',
+          boxShadow: '0 40px 100px -20px rgba(0,0,0,.7)',
+          cursor: 'default',
+          transformOrigin: 'center center',
+          transform: isOpen ? 'none' : (transformFromOrigin || 'scale(0.92)'),
+          transition: 'transform 0.42s cubic-bezier(0.22, 1, 0.36, 1)',
+          willChange: 'transform',
+        }}
+        draggable={false}
+      />
+
+      {/* arrows — fade in */}
+      <div style={{
+        opacity: isOpen ? 1 : 0,
+        transition: 'opacity 0.25s ease 0.12s',
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+      }}>
+        <div style={{ pointerEvents: 'auto' }}>
+          <ArrowButton
+            dir="left"
+            ariaLabel="Previous screenshot"
+            onClick={onPrev}
+            className="shots-fs-arrow left"
+            style={{ position: 'absolute', left: 24, top: '50%', transform: 'translateY(-50%)', width: 48, height: 48 }}
+          />
+          <ArrowButton
+            dir="right"
+            ariaLabel="Next screenshot"
+            onClick={onNext}
+            className="shots-fs-arrow right"
+            style={{ position: 'absolute', right: 24, top: '50%', transform: 'translateY(-50%)', width: 48, height: 48 }}
+          />
+        </div>
+      </div>
+
+      {/* footer caption — fades in */}
+      <div
+        className="shots-fs-caption"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          position: 'absolute', bottom: 22, left: '50%',
+          fontSize: 13, color: 'var(--fg-1)', maxWidth: 640, textAlign: 'center',
+          letterSpacing: '-0.005em',
+          opacity: isOpen ? 1 : 0,
+          transform: isOpen ? 'translate(-50%, 0)' : 'translate(-50%, 6px)',
+          transition: 'opacity 0.25s ease 0.14s, transform 0.25s ease 0.14s',
+        }}>
+        {shot.caption}
       </div>
     </div>
   );
 }
 
-function ChatPanelMock() {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', background: 'var(--bg-1)' }}>
-      <div style={{
-        height: 36, padding: '0 14px',
-        display: 'flex', alignItems: 'center', gap: 10,
-        borderBottom: '1px solid var(--line-0)'
-      }}>
-        <div style={{
-          width: 18, height: 18, borderRadius: '50%',
-          background: 'color-mix(in oklch, var(--ai) 22%, transparent)',
-          border: '1px solid color-mix(in oklch, var(--ai) 40%, transparent)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--ai)', animation: 'aiPulse 1.6s ease-in-out infinite' }} />
-        </div>
-        <span style={{ fontSize: 12, fontWeight: 600 }}>Assistant</span>
-        <span style={{ marginLeft: 'auto' }} className="mono-l">2/5 TURNS</span>
-      </div>
-      <div style={{ flex: 1, padding: '14px 14px 8px', display: 'flex', flexDirection: 'column', gap: 10, overflow: 'hidden' }}>
-        <div style={{
-          alignSelf: 'flex-start', maxWidth: '85%', fontSize: 11.5,
-          color: 'var(--fg-2)', fontFamily: 'var(--font-mono)', letterSpacing: '0.02em'
-        }}>Analysis complete: 9 tracks analyzed.</div>
-        <div style={{
-          alignSelf: 'flex-end', maxWidth: '85%',
-          background: 'var(--bg-3)', padding: '8px 12px',
-          borderRadius: 8, fontSize: 12.5, color: 'var(--fg-0)',
-        }}>What's the biggest issue with this mix?</div>
-        <div style={{
-          alignSelf: 'flex-start', maxWidth: '92%',
-          fontSize: 12.5, color: 'var(--fg-0)', lineHeight: 1.55,
-        }}>
-          <strong>Sub is hot.</strong> Kick (80–120 Hz) is masking Bass DI at −7 dB on the Drum Bus — that's your biggest issue.
-          <br /><br />
-          Try a <strong>1–2 dB cut</strong> at 90 Hz on the bass, sidechained to the kick. The Vocal Lead is also fighting Snare in the mid band — pull the snare down 1 dB or carve a 1 kHz dip on the snare bus<span style={{
-            display: 'inline-block', width: 6, height: 12, background: 'var(--ai)',
-            marginLeft: 3, verticalAlign: -2, animation: 'pulseOpacity 1s ease infinite'
-          }} />
-        </div>
-      </div>
-      {/* suggestion chips */}
-      <div style={{ padding: '0 14px 10px', display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-        {['Is the low end balanced?', 'Which tracks are masking each other?', 'Is my mix muddy?'].map(t => (
-          <span key={t} style={{
-            padding: '4px 10px', borderRadius: 999,
-            background: 'var(--bg-2)', border: '1px solid var(--line-0)',
-            fontSize: 11, color: 'var(--fg-1)'
-          }}>{t}</span>
-        ))}
-      </div>
-      {/* input row */}
-      <div style={{
-        margin: '0 14px 14px', padding: '8px 12px',
-        background: 'var(--bg-2)', border: '1px solid var(--line-0)',
-        borderRadius: 6, display: 'flex', alignItems: 'center', gap: 10
-      }}>
-        <span style={{ flex: 1, fontSize: 12, color: 'var(--fg-3)' }}>Ask about balance, EQ, dynamics…</span>
-        <button style={{
-          width: 22, height: 22, borderRadius: 4,
-          background: 'var(--signal)',
-          border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: 'oklch(0.18 0.008 60)'
-        }}>
-          <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1.5 5h7m-3-3 3 3-3 3" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" fill="none" /></svg>
-        </button>
-      </div>
-    </div>
-  );
-}
 
 // ─── Video placeholder ──────────────────────────────────────────────────────
 function VideoPlaceholder({ label = 'Demo video', height = 480 }) {
@@ -494,6 +803,6 @@ function SpectrumBars({ bars = [0.6, 0.85, 0.55, 0.3, 0.5, 0.7, 0.9, 0.45, 0.25,
 Object.assign(window, {
   MeterCells, LetterBadge, PluginWindow,
   LeftEarMock, RightEarMock,
-  RoutingGraphIllustration, DesktopAppMock, ChatPanelMock,
+  RoutingGraphIllustration, DesktopAppMock,
   VideoPlaceholder, SpectrumBars,
 });

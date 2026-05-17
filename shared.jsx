@@ -115,12 +115,12 @@ const HOW_IT_WORKS = [
 ];
 
 const FEATURES = [
-  ['ANALYSIS', 'LUFS · peak · crest factor · dynamic range, calculated per track and per bus.'],
-  ['SPECTRAL BALANCE', '6-band energy breakdown with masking detection across every routing pair.'],
-  ['STEREO FIELD', 'Width readouts and transient density, surfaced per track and on the master.'],
-  ['ROUTING GRAPH', 'Sources → Buses → Master rebuilt from the plugins. Click any node to audition it.'],
-  ['AI ASSISTANT', '5 turns per session, streamed locally. Cites the exact measurement behind each suggestion.'],
-];
+  ['ANALYSIS', 'LUFS, peak, crest factor, stereo width and transient density — measured per track. The full picture the AI assistant draws on, even when it never reaches the screen.'],
+  ['SPECTRAL BALANCE', '6-band energy breakdown for every track, so you can see exactly where each one sits in the spectrum.'],
+  ['MASKING DETECTION', 'Finds common masking patterns — low-end conflicts, low-mid buildup, crowded mids, harsh highs, buried leads — names the tracks that collide, and suggests concrete EQ, compression, level and pan fixes for each.'],
+  ['ROUTING GRAPH', 'Sources → buses → master, rebuilt straight from the plugins. Click any node to audition it, or see how many LU each source adds to the master.'],
+  ['AI ASSISTANT', 'A mixing assistant that runs entirely on your machine. Every suggestion cites the exact measurement behind it.'],
+  ];
 
 const FAQ = [
   ['Does it use AI?', 'Yes — a local AI model running on your machine. Nothing is sent to a server.'],
@@ -405,7 +405,7 @@ function FeatureList({ id = 'features' }) {
               display: 'grid', gridTemplateColumns: '180px 1fr auto',
               padding: '20px 0', gap: 28,
               borderBottom: '1px solid var(--site-line)',
-              alignItems: 'baseline',
+              alignItems: 'center',
             }}>
               <span className="mono-l" style={{ color: 'var(--site-fg)' }}>{label}</span>
               <span style={{ fontSize: 15, color: 'var(--site-fg-1)', lineHeight: 1.5 }}>{desc}</span>

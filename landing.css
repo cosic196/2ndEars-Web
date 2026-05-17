@@ -225,6 +225,12 @@
     var(--site-bg);
 }
 
+/* ─── Feature rows: equal-height on desktop, natural on mobile ──────── */
+.feature-rows { display: grid; grid-auto-rows: 88px; }
+@media (max-width: 768px) {
+  .feature-rows { display: block; }
+}
+
 /* ─── App-mock chrome (excluded from mobile collapse) ───────────────── */
 .app-mock-grid { display: grid; grid-template-columns: 1.4fr 1fr; }
 .app-mock-frame { width: 100%; }
@@ -301,19 +307,45 @@
     align-items: center !important;
   }
 
-  /* ─── Desktop-app screenshot: horizontal-scroll snapshot ──────────── */
+  /* ─── Desktop-app screenshot: image carousel scales to viewport ──── */
   .app-mock-frame {
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    margin: 0 -16px;
-    padding: 0 16px 8px;
-    /* Hint at scroll affordance with a soft right fade */
-    -webkit-mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
-            mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 16px), transparent 100%);
+    margin: 0;
+    padding: 0;
   }
   .app-mock-frame > * {
-    min-width: 940px;
+    min-width: 0;
+  }
+  /* Inline arrows shrink on mobile so they don't crowd the image */
+  .app-shots .shots-arrow {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  /* Hint copy below the image: swap "click + keys" for "tap + swipe" */
+  .app-shots .shots-hint-desktop { display: none !important; }
+  .app-shots .shots-hint-touch { display: inline !important; }
+  /* Fullscreen lightbox: tighter padding so the image stays large on mobile */
+  [role="dialog"].shots-fs {
+    padding: 56px 12px 64px !important;
+  }
+  [role="dialog"].shots-fs .shots-fs-chrome {
+    left: 12px !important;
+    right: 12px !important;
+    top: 14px !important;
+  }
+  [role="dialog"].shots-fs .shots-fs-arrow {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  [role="dialog"].shots-fs .shots-fs-arrow.left {
+    left: 8px !important;
+  }
+  [role="dialog"].shots-fs .shots-fs-arrow.right {
+    right: 8px !important;
+  }
+  [role="dialog"].shots-fs .shots-fs-caption {
+    bottom: 14px !important;
+    font-size: 11.5px !important;
+    padding: 0 16px !important;
   }
 
   /* Signal-flow strip — stack the steps */
@@ -332,7 +364,6 @@
   .site [style*="grid-template-columns: 180px"] > .mono-tiny:last-child {
     display: none;
   }
-
   /* FOR PROS metric grid — keep the 3-up layout on mobile, just shrink the cells. */
   .site .pro-metrics {
     grid-template-columns: repeat(3, 1fr) !important;
