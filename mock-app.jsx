@@ -392,8 +392,8 @@ function DesktopAppMock({ height = 540 }) {
       <span style={{ opacity: 0.5 }}> / {String(total).padStart(2, '0')}</span>
       <span style={{ margin: '0 8px', opacity: 0.5 }}>·</span>
       <span style={{ color: 'var(--signal)' }}>{shot.label}</span>
-      <span style={{ margin: '0 8px', opacity: 0.5 }}>·</span>
-      <span style={{ color: 'var(--fg-1)', textTransform: 'none', letterSpacing: '0.02em' }}>{shot.caption}</span>
+      <span className="shots-caption-text" style={{ margin: '0 8px', opacity: 0.5 }}>·</span>
+      <span className="shots-caption-text" style={{ color: 'var(--fg-1)', textTransform: 'none', letterSpacing: '0.02em' }}>{shot.caption}</span>
     </span>
   );
 
