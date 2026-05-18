@@ -346,6 +346,11 @@
     bottom: 14px !important;
     font-size: 11.5px !important;
     padding: 0 16px !important;
+    display: none !important;
+  }
+
+  .shots-caption-text {
+    display: none !important;
   }
 
   /* Signal-flow strip — stack the steps */
