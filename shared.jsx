@@ -110,7 +110,7 @@ const HOW_IT_WORKS = [
   {
     step: '03',
     name: '2ndEars',
-    role: 'Desktop app · Win + macOS',
+    role: 'Desktop app · Win + macOS (coming soon)',
     body: 'Receives audio, rebuilds Sources → Buses → Master, runs analysis, and hosts the chat. Click any node to audition it in isolation. Ask anything in plain English.',
     spec: ['Routing · Analysis · Masking', 'Local AI'],
   },
@@ -200,7 +200,7 @@ function Footer() {
         <div className="foot-col" style={{ alignItems: 'flex-end' }}>
           <span className="foot-meta">BETA</span>
           <span style={{ fontSize: 11, color: 'var(--site-fg-3)', fontFamily: 'var(--font-mono)' }}>
-            Windows · macOS · VST3
+            Windows · macOS (coming soon) · VST3
           </span>
           <span style={{ fontSize: 11, color: 'var(--site-fg-3)', fontFamily: 'var(--font-mono)' }}>
             © 2026 2ndEars
@@ -368,7 +368,7 @@ function PricingCard({ id = 'pricing' }) {
                 'No license required',
                 'No card required',
                 'Keep your beta version forever',
-                'Windows 10+ · macOS 12+',
+                'Windows 10+ · macOS 12+ (coming soon)',
               ].map(t => (
                 <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--site-fg-1)' }}>
                   <span style={{ width: 14, height: 14, color: 'var(--site-accent)', flexShrink: 0 }}>
@@ -532,7 +532,8 @@ function DownloadButton({ size = 'md', variant = 'primary', showHint = true, ali
     return (
       <div className="dl-cta-wrap" style={{ alignItems: align === 'left' ? 'flex-start' : 'stretch' }}>
         <div className="dl-side-row">
-          {['windows', 'macos'].map((p) => (
+          {/* macOS download hidden for now — coming soon. Re-add 'macos' to restore. */}
+          {['windows'].map((p) => (
             <a
               key={p}
               href={DOWNLOAD_URLS[p]}
