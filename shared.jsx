@@ -5,7 +5,7 @@ const PRICE = '$99';
 const TRIAL = '2-week free trial';
 const BUY_URL = '#';        // wire to polar.sh later
 const DOWNLOAD_URLS = {
-  windows: 'https://apps.microsoft.com/store/apps/PLACEHOLDER',
+  windows: 'https://apps.microsoft.com/detail/9MVQ5Z81GSXC',
   macos:   'https://github.com/cosic196/2ndEars-Web/releases/latest/download/2ndEars-Downloader.dmg',
 };
 // Legacy alias — kept so any stray reference still resolves to something.
