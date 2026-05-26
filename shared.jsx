@@ -5,7 +5,7 @@ const PRICE = '$99';
 const TRIAL = '2-week free trial';
 const BUY_URL = '#';        // wire to polar.sh later
 const DOWNLOAD_URLS = {
-  windows: 'https://github.com/cosic196/2ndEars-Web/releases/latest/download/2ndEars-Downloader.exe',
+  windows: 'https://apps.microsoft.com/detail/9MVQ5Z81GSXC',
   macos:   'https://github.com/cosic196/2ndEars-Web/releases/latest/download/2ndEars-Downloader.dmg',
 };
 // Legacy alias — kept so any stray reference still resolves to something.
@@ -52,10 +52,8 @@ function useDownloadState() {
 }
 
 // ─── Download gate ──────────────────────────────────────────────────────────
-// 2ndEars is in open beta. The Windows build is unsigned (SmartScreen); the
-// macOS build is signed but not notarized (Gatekeeper still warns). Every
-// Download click opens a platform-aware modal that walks the user through
-// the OS-specific warnings before the file starts downloading.
+// Windows downloads go directly to the Microsoft Store (no warnings needed).
+// macOS downloads open a modal that walks the user through Gatekeeper.
 function handleDownloadClick(e, platformOverride) {
   if (e && e.preventDefault) e.preventDefault();
   if (platformOverride) {
@@ -63,11 +61,15 @@ function handleDownloadClick(e, platformOverride) {
     window.__downloadState.forcedPlatform = null;
     window.__downloadState.listeners.forEach(fn => fn());
   }
+  const p = platformOverride || window.__downloadState.platform;
+  if (p === 'windows') {
+    window.open(DOWNLOAD_URLS.windows, '_blank', 'noopener');
+    return;
+  }
   if (typeof window.__openDownloadModal === 'function') {
     window.__openDownloadModal();
   } else {
-    const p = platformOverride || window.__downloadState.platform;
-    window.location.href = DOWNLOAD_URLS[p] || DOWNLOAD_URLS.windows;
+    window.location.href = DOWNLOAD_URLS[p] || DOWNLOAD_URLS.macos;
   }
 }
 
@@ -108,7 +110,7 @@ const HOW_IT_WORKS = [
   {
     step: '03',
     name: '2ndEars',
-    role: 'Desktop app · Win + macOS',
+    role: 'Desktop app · Win + macOS (coming soon)',
     body: 'Receives audio, rebuilds Sources → Buses → Master, runs analysis, and hosts the chat. Click any node to audition it in isolation. Ask anything in plain English.',
     spec: ['Routing · Analysis · Masking', 'Local AI'],
   },
@@ -198,7 +200,7 @@ function Footer() {
         <div className="foot-col" style={{ alignItems: 'flex-end' }}>
           <span className="foot-meta">BETA</span>
           <span style={{ fontSize: 11, color: 'var(--site-fg-3)', fontFamily: 'var(--font-mono)' }}>
-            Windows · macOS · VST3
+            Windows · macOS (coming soon) · VST3
           </span>
           <span style={{ fontSize: 11, color: 'var(--site-fg-3)', fontFamily: 'var(--font-mono)' }}>
             © 2026 2ndEars
@@ -366,7 +368,7 @@ function PricingCard({ id = 'pricing' }) {
                 'No license required',
                 'No card required',
                 'Keep your beta version forever',
-                'Windows 10+ · macOS 12+',
+                'Windows 10+ · macOS 12+ (coming soon)',
               ].map(t => (
                 <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--site-fg-1)' }}>
                   <span style={{ width: 14, height: 14, color: 'var(--site-accent)', flexShrink: 0 }}>
@@ -530,7 +532,8 @@ function DownloadButton({ size = 'md', variant = 'primary', showHint = true, ali
     return (
       <div className="dl-cta-wrap" style={{ alignItems: align === 'left' ? 'flex-start' : 'stretch' }}>
         <div className="dl-side-row">
-          {['windows', 'macos'].map((p) => (
+          {/* macOS download hidden for now — coming soon. Re-add 'macos' to restore. */}
+          {['windows'].map((p) => (
             <a
               key={p}
               href={DOWNLOAD_URLS[p]}
@@ -589,11 +592,10 @@ function DownloadButton({ size = 'md', variant = 'primary', showHint = true, ali
 }
 
 // ─── Inline "warning" hint under each Download button ──────────────────────
+// Only shown for macOS (Gatekeeper warning). Windows goes to the Store — no hint needed.
 function DownloadHint({ align = 'center' }) {
   const { platform } = useDownloadState();
-  const copy = platform === 'macos'
-    ? 'Signed beta · how to skip the macOS Gatekeeper warning'
-    : 'Unsigned beta · how to skip the Windows warning';
+  if (platform !== 'macos') return null;
   return (
     <button
       type="button"
@@ -605,7 +607,7 @@ function DownloadHint({ align = 'center' }) {
         <path d="M6 1 L11 10.5 L1 10.5 Z" fill="none" stroke="currentColor" strokeWidth="1" strokeLinejoin="round" />
         <path d="M6 5 V7.5 M6 9 v0.1" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
       </svg>
-      <span>{copy}</span>
+      <span>Signed beta · how to skip the macOS Gatekeeper warning</span>
     </button>
   );
 }
@@ -613,12 +615,11 @@ function DownloadHint({ align = 'center' }) {
 // Back-compat alias — landing.jsx imports it by this name.
 const WindowsWarningNote = DownloadHint;
 
-// ─── Pre-download modal — platform-aware ───────────────────────────────────
-// One modal handles both OSes. The platform tabs at the top let the user
-// switch; the step list rewrites in place. Mounts once at the page root.
+// ─── Pre-download modal — macOS Gatekeeper warning ─────────────────────────
+// Windows downloads go directly to the Microsoft Store, so this modal is
+// macOS-only. Mounts once at the page root.
 function DownloadModal() {
   const [open, setOpen] = React.useState(false);
-  const { platform, setPlatform } = useDownloadState();
 
   React.useEffect(() => {
     window.__openDownloadModal = () => setOpen(true);
@@ -643,10 +644,8 @@ function DownloadModal() {
   const proceed = (e) => {
     if (e && e.preventDefault) e.preventDefault();
     setOpen(false);
-    setTimeout(() => { window.location.href = DOWNLOAD_URLS[platform]; }, 60);
+    setTimeout(() => { window.location.href = DOWNLOAD_URLS.macos; }, 60);
   };
-
-  const isMac = platform === 'macos';
 
   return (
     <div className="dl-modal-backdrop" onClick={close}>
@@ -659,104 +658,52 @@ function DownloadModal() {
       >
         <button className="dl-modal-close" onClick={close} aria-label="Close">×</button>
 
-        <div className="dl-modal-platform">
-          <span className="mono-l" style={{ color: 'var(--site-fg-3)' }}>PLATFORM</span>
-          <OSSwitch value={platform} onChange={setPlatform} />
-        </div>
-
-        <span className="mono-l label-accent">
-          {isMac ? 'HEADS UP · MACOS GATEKEEPER' : 'HEADS UP · WINDOWS SMARTSCREEN'}
-        </span>
-        <h2 id="dl-modal-title" className="dl-modal-title">
-          {isMac
-            ? "Your Mac will warn you. That's expected."
-            : "Windows will warn you. That's expected."}
-        </h2>
+        <span className="mono-l label-accent">HEADS UP · MACOS GATEKEEPER</span>
+        <h2 id="dl-modal-title" className="dl-modal-title">Your Mac will warn you. That's expected.</h2>
         <p className="dl-modal-lede">
-          {isMac ? (
-            <>2ndEars is in open beta. The build is code-signed but not yet notarized,
-            so Gatekeeper will warn that Apple <em>"cannot check it for malicious software"</em>.
-            It's safe to install — here's how to get past the warning on any macOS version.</>
-          ) : (
-            <>2ndEars is in open beta and not yet code-signed, so Windows will flag it as
-            coming from an "unknown publisher". It's safe to install — here's how to
-            get past the two warnings you'll see.</>
-          )}
+          2ndEars is in open beta. The build is code-signed but not yet notarized,
+          so Gatekeeper will warn that Apple <em>"cannot check it for malicious software"</em>.
+          It's safe to install — here's how to get past the warning on any macOS version.
         </p>
 
-        {isMac ? (
-          <ol className="dl-steps">
-            <li>
-              <span className="dl-step-n">1</span>
-              <div className="dl-step-body">
-                <h3>Open the .dmg, drag 2ndEars to Applications</h3>
-                <p>Double-click the downloaded <strong>2ndEars-Downloader.dmg</strong>,
-                then drag the <strong>2ndEars</strong> icon onto the <strong>Applications</strong> folder shortcut inside the window.</p>
-              </div>
-            </li>
-            <li>
-              <span className="dl-step-n">2</span>
-              <div className="dl-step-body">
-                <h3>First launch — right-click → Open</h3>
-                <p>Open <strong>Applications</strong>, <strong>right-click</strong> (or Control-click)
-                <em> 2ndEars</em>, choose <strong>Open</strong>, then click <strong>Open</strong> again
-                in the dialog that appears. <span style={{ color: 'var(--site-fg-3)' }}>You only need to do this once.</span></p>
-              </div>
-            </li>
-            <li>
-              <span className="dl-step-n">3</span>
-              <div className="dl-step-body">
-                <h3>On macOS Sequoia (15) or later</h3>
-                <p>Apple removed the right-click shortcut. Instead, try to open 2ndEars normally
-                (Gatekeeper will block it), then open <strong>System Settings → Privacy &amp; Security</strong>,
-                scroll down to <em>"2ndEars was blocked from use…"</em> and click <strong>Open Anyway</strong>.</p>
-              </div>
-            </li>
-          </ol>
-        ) : (
-          <ol className="dl-steps">
-            <li>
-              <span className="dl-step-n">1</span>
-              <div className="dl-step-body">
-                <h3>Your browser may flag the download</h3>
-                <p>
-                  If Chrome or Edge says <em>"this file isn't commonly downloaded"</em>,
-                  click <strong>Keep</strong> (Chrome) or the <strong>⋯ menu → Keep</strong> (Edge).
-                </p>
-              </div>
-            </li>
-            <li>
-              <span className="dl-step-n">2</span>
-              <div className="dl-step-body">
-                <h3>SmartScreen appears when you run the installer</h3>
-                <p>
-                  You'll see <em>"Windows protected your PC"</em>. Click the small
-                  <strong> More info</strong> link, then the <strong>Run anyway</strong> button
-                  that appears.
-                </p>
-              </div>
-            </li>
-            <li>
-              <span className="dl-step-n">3</span>
-              <div className="dl-step-body">
-                <h3>UAC will ask for permission</h3>
-                <p>Windows asks whether to allow changes for the install. Click <strong>Yes</strong>.</p>
-              </div>
-            </li>
-          </ol>
-        )}
+        <ol className="dl-steps">
+          <li>
+            <span className="dl-step-n">1</span>
+            <div className="dl-step-body">
+              <h3>Open the .dmg, drag 2ndEars to Applications</h3>
+              <p>Double-click the downloaded <strong>2ndEars-Downloader.dmg</strong>,
+              then drag the <strong>2ndEars</strong> icon onto the <strong>Applications</strong> folder shortcut inside the window.</p>
+            </div>
+          </li>
+          <li>
+            <span className="dl-step-n">2</span>
+            <div className="dl-step-body">
+              <h3>First launch — right-click → Open</h3>
+              <p>Open <strong>Applications</strong>, <strong>right-click</strong> (or Control-click)
+              <em> 2ndEars</em>, choose <strong>Open</strong>, then click <strong>Open</strong> again
+              in the dialog that appears. <span style={{ color: 'var(--site-fg-3)' }}>You only need to do this once.</span></p>
+            </div>
+          </li>
+          <li>
+            <span className="dl-step-n">3</span>
+            <div className="dl-step-body">
+              <h3>On macOS Sequoia (15) or later</h3>
+              <p>Apple removed the right-click shortcut. Instead, try to open 2ndEars normally
+              (Gatekeeper will block it), then open <strong>System Settings → Privacy &amp; Security</strong>,
+              scroll down to <em>"2ndEars was blocked from use…"</em> and click <strong>Open Anyway</strong>.</p>
+            </div>
+          </li>
+        </ol>
 
         <p className="dl-modal-fine">
-          {isMac
-            ? 'Apple notarization is on the roadmap before 1.0. For now, the macOS beta stays un-notarized so we can ship updates quickly.'
-            : 'A signing certificate is on the roadmap before 1.0. For now, the Windows beta stays unsigned so we can ship updates quickly.'}
+          Apple notarization is on the roadmap before 1.0. For now, the macOS beta stays un-notarized so we can ship updates quickly.
         </p>
 
         <div className="dl-modal-actions">
           <button type="button" className="btn btn-ghost" onClick={close}>Cancel</button>
-          <a className="btn btn-primary" href={DOWNLOAD_URLS[platform]} onClick={proceed} style={{ gap: 9 }}>
-            <OSGlyph id={platform} size={13} />
-            <span>Got it · Download {PLATFORMS[platform].ext}</span>
+          <a className="btn btn-primary" href={DOWNLOAD_URLS.macos} onClick={proceed} style={{ gap: 9 }}>
+            <OSGlyph id="macos" size={13} />
+            <span>Got it · Download .dmg</span>
           </a>
         </div>
       </div>

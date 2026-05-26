@@ -36,7 +36,7 @@ function LandingB() {
               <div className="dashed-hr" />
               <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 18, rowGap: 8, fontFamily: 'var(--font-mono)' }}>
                 <span className="mono-l">STATUS</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>Open beta · free</span>
-                <span className="mono-l">RUNS ON</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>Windows · macOS</span>
+                <span className="mono-l">RUNS ON</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>Windows · macOS (coming soon)</span>
                 <span className="mono-l">FORMATS</span><span style={{ fontSize: 12, color: 'var(--site-fg-1)' }}>VST3</span>
               </div>
               <DownloadButton size="md" align="left" />
@@ -168,7 +168,7 @@ function LandingB() {
               <span className="mono-l" style={{ display: 'block', marginBottom: 20 }}>MINIMUM</span>
               <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 18, rowGap: 8 }}>
                 <span className="mono-l">OS</span>
-                <span style={{ fontSize: 12, color: 'var(--site-fg-1)', fontFamily: 'var(--font-mono)' }}>Win 10+ · macOS 12+</span>
+                <span style={{ fontSize: 12, color: 'var(--site-fg-1)', fontFamily: 'var(--font-mono)' }}>Win 10+ · macOS 12+ (coming soon)</span>
                 <span className="mono-l">RAM</span>
                 <span style={{ fontSize: 12, color: 'var(--site-fg-1)', fontFamily: 'var(--font-mono)' }}>16 GB</span>
                 <span className="mono-l">DISK</span>
@@ -179,7 +179,7 @@ function LandingB() {
               <span className="mono-l" style={{ display: 'block', marginBottom: 20 }}>RECOMMENDED</span>
               <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: 18, rowGap: 8 }}>
                 <span className="mono-l">OS</span>
-                <span style={{ fontSize: 12, color: 'var(--site-fg-1)', fontFamily: 'var(--font-mono)' }}>Win 11 · macOS 14+ (Apple Silicon)</span>
+                <span style={{ fontSize: 12, color: 'var(--site-fg-1)', fontFamily: 'var(--font-mono)' }}>Win 11 · macOS 14+ (Apple Silicon · coming soon)</span>
                 <span className="mono-l">RAM</span>
                 <span style={{ fontSize: 12, color: 'var(--site-fg-1)', fontFamily: 'var(--font-mono)' }}>32 GB · or 16 GB + GTX 1060</span>
                 <span className="mono-l">DISK</span>
@@ -300,7 +300,7 @@ function PricingInline() {
           2ndEars is currently in an open beta program. Download it, use it, keep it — no license needed. Beta users keep their version forever.
         </p>
         <ul style={{ listStyle: 'none', padding: 0, margin: '12px 0 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          {['No license required', 'No card required', 'Keep your beta version forever', 'Win 10+ · macOS 12+'].map(t => (
+          {['No license required', 'No card required', 'Keep your beta version forever', 'Win 10+ · macOS 12+ (coming soon)'].map(t => (
             <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'var(--site-fg-1)' }}>
               <span style={{ width: 14, height: 14, color: 'var(--site-accent)', flexShrink: 0 }}>
                 <svg width="14" height="14" viewBox="0 0 10 10"><path d="M2 5 L4.2 7.2 L8 3" stroke="currentColor" strokeWidth="1.4" fill="none" strokeLinecap="round" strokeLinejoin="round" /></svg>
